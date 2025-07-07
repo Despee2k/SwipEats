@@ -5,15 +5,20 @@ This is the documentation for setting up SwipEats in DCISM Server.
 ## Prerequisite: Environment Set up (Server)
 
 ### Step 1: SSH into `web.dcism.org`
+Instructions can be found in `admin.dcism.org`
 
 ### Step 2:  Clone the repository
 ```
+cd {{ PROJECT_DOMAIN }}
 git clone https://github.com/Despee2k/SwipEats.git
 cd SwipEats
 mv * .[^.]* ../
 cd ..
 rmdir SwipEats
 ```
+
+> [!NOTE]
+> Replace {{ PROJECT_DOMAIN }} with actual project domain
 
 ### Step 3: Configure `.htaccess`
 ```
