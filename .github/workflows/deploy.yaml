@@ -1,0 +1,27 @@
+name: Deploy SwipEats Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy SwipEats Go Server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DCISM_HOST }}
+          username: ${{ secrets.DCISM_USERNAME }}
+          password: ${{ secrets.DCISM_PASSWORD }}
+          port: ${{ secrets.DCISM_PORT }}
+          script: |
+            cd ${{ secrets.DCISM_DOMAIN }}/server
+            git reset --hard && git pull origin main
+            pm2 stop swipeats
+            go build -o swipeats main.go
+            pm2 start swipeats --name swipeats --interpreter=none
+            pm2 save
