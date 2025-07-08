@@ -51,3 +51,15 @@ func CreateUser(user *models.User) error {
 	}
 	return nil // User created successfully
 }
+
+func UpdateUser(user *models.User) error {
+	if db.Conn == nil {
+		return gorm.ErrInvalidDB // Database connection is not established
+	}
+
+	result := db.Conn.Save(user)
+	if result.Error != nil {
+		return result.Error // Error updating user
+	}
+	return nil // User updated successfully
+}
