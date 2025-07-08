@@ -13,7 +13,7 @@ Instructions can be found in `admin.dcism.org`
 ```
 cd {{ PROJECT_DOMAIN }}
 
-git clone --filter=blob:none --no-checkout https://github.com/Despee2k/SwipEats.git
+git clone --filter=blob:none --no-checkout https://github.com/SwipEats/SwipEats.git
 cd SwipEats
 
 git sparse-checkout init --cone
