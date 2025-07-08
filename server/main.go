@@ -4,9 +4,9 @@ import (
  "fmt"
  "log"
  "net/http"
- "github.com/Despee2k/server/internal/routes"
- "github.com/Despee2k/server/internal/constants"
- "github.com/Despee2k/server/internal/db"
+ "github.com/SwipEats/SwipEats/server/internal/routes"
+ "github.com/SwipEats/SwipEats/server/internal/constants"
+ "github.com/SwipEats/SwipEats/server/internal/db"
 )
 
 func main() {
