@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/SwipEats/SwipEats/server/internal/handlers"
 	"github.com/SwipEats/SwipEats/server/internal/middlewares"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -39,7 +40,10 @@ func Setup() http.Handler {
 
 	// Mounting sub-routers for different API versions
 	r.Route("/api/v1", func(r chi.Router) {
+		r.Get("/uploads/{userID}", handlers.GetProfilePictureHandler)
+
 		r.Mount("/auth", AuthRouter())
+		r.With(middlewares.JWTMiddleware).Mount("/user", UserRouter())
 		r.With(middlewares.JWTMiddleware).Mount("/group", GroupRouter())
 	})
 
