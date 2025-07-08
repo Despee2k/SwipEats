@@ -6,11 +6,12 @@ import (
 	"strings"
 
 	"github.com/SwipEats/SwipEats/server/internal/utils"
+	"github.com/SwipEats/SwipEats/server/internal/repositories"
 )
 
 type contextKey string
 
-const UserEmailKey contextKey = "userEmail"
+const UserIDKey contextKey = "userID"
 
 func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +30,14 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), UserEmailKey, user.Email)
+		existingUser, err := repositories.GetUserByEmail(user.Email)
+
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+
+
+		ctx := context.WithValue(r.Context(), UserIDKey, existingUser.ID)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

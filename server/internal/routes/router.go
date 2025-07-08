@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/SwipEats/SwipEats/server/internal/middlewares"
@@ -28,8 +29,8 @@ func Setup() http.Handler {
 	})
 
 	r.With(middlewares.JWTMiddleware).Get("/protected", func(w http.ResponseWriter, r *http.Request) {
-		userEmail := r.Context().Value(middlewares.UserEmailKey)
-		w.Write([]byte("Protected route accessed by user email: " + userEmail.(string)))
+		userID := r.Context().Value(middlewares.UserIDKey)
+		w.Write([]byte("Protected route accessed by user id: " + fmt.Sprintf("%d", userID.(uint))))
 	})
 
 	r.Route("/api/v1", func(r chi.Router) {
