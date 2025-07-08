@@ -8,11 +8,11 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
-	"github.com/Despee2k/server/internal/constants"
-	"github.com/Despee2k/server/internal/models" 
+	"github.com/SwipEats/SwipEats/server/internal/constants"
+	"github.com/SwipEats/SwipEats/server/internal/models" 
 )
 
-var conn *gorm.DB
+var Conn *gorm.DB
 
 func ConnectDatabase() {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
@@ -30,16 +30,16 @@ func ConnectDatabase() {
 		os.Exit(1)
 	}
 
-	conn = _conn
+	Conn = _conn
 	fmt.Println("Database connection established successfully")
 }
 
 func MigrateModels() {
-	if conn == nil {
+	if Conn == nil {
 		log.Fatal("Database connection is not established")
 	}
 
-	err := conn.AutoMigrate(
+	err := Conn.AutoMigrate(
 		&models.User{},
 		&models.Group{},
 		&models.GroupMembership{},

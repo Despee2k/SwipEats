@@ -1,7 +1,7 @@
 package constants
 
 import (
-	"github.com/Despee2k/server/internal/config"
+	"github.com/SwipEats/SwipEats/server/internal/config"
 	"strconv"
 )
 
@@ -11,6 +11,7 @@ var DB_PORT int
 var DB_USER string
 var DB_PASSWORD string
 var DB_NAME string
+var JWT_SECRET string
 
 func InitEnv() {
 	config.LoadEnv()
@@ -21,6 +22,8 @@ func InitEnv() {
 	DB_USER = config.GetEnv("DB_USER", "root")
 	DB_PASSWORD = config.GetEnv("DB_PASSWORD", "")
 	DB_NAME = config.GetEnv("DB_NAME", "swipeats_db")
+
+	JWT_SECRET = config.GetEnv("JWT_SECRET", "defaultsecretkey")
 	
 	port, err := strconv.Atoi(portStr)
 
