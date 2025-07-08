@@ -36,6 +36,11 @@ func ValidateJWT(tokenString string) (*models.User, error) {
 		return nil, jwt.ErrTokenMalformed
 	}
 
+	exp, ok := claims["exp"].(float64)
+	if !ok || int64(exp) < time.Now().Unix() {
+		return nil, jwt.ErrTokenExpired
+	}
+
 	email, ok := claims["email"].(string)
 	if !ok {
 		return nil, jwt.ErrTokenMalformed
