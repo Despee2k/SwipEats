@@ -7,6 +7,7 @@ import (
 
 type Group struct {
 	ID 				uint           `json:"id" gorm:"primaryKey;autoIncrement;"`
+	GroupCode		string         `json:"group_code" gorm:"not null"`
 	Name 			string         `json:"name" gorm:"not null"`
 	LocationLat		float64        `json:"location_lat" gorm:"not null"`
 	LocationLong	float64        `json:"location_long" gorm:"not null"`
