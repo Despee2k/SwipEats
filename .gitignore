@@ -1,3 +1,4 @@
 node_modules
 .env
 .htaccess
+.DS_Store
