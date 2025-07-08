@@ -12,7 +12,24 @@ func GetUserByEmail(email string) (*models.User, error) {
 	}
 
 	var user models.User
-	result := db.Conn.Where("email = ?", email).First(&user)
+	result := db.Conn.Where("email = ? AND deleted_at IS NULL", email).First(&user)
+
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil // User not found
+		}
+		return nil, result.Error // Other error
+	}
+	return &user, nil
+}
+
+func GetUserByID(userID uint) (*models.User, error) {
+	if db.Conn == nil {
+		return nil, gorm.ErrInvalidDB // Database connection is not established
+	}
+
+	var user models.User
+	result := db.Conn.Where("id = ? AND deleted_at IS NULL", userID).First(&user)
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
