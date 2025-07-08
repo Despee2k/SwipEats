@@ -1,6 +1,8 @@
 package services
 
 import (
+	"errors"
+
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
 	"github.com/SwipEats/SwipEats/server/internal/models"
 	"github.com/SwipEats/SwipEats/server/internal/repositories"
@@ -16,7 +18,7 @@ func RegisterUser(user *dtos.UserRegisterRequestDto) error {
 	}
 
 	if existingUser != nil {
-		return bcrypt.ErrMismatchedHashAndPassword // User already exists
+		return errors.New("user already exists")
 	}
 
 	if user.Password != user.ConfirmPassword {

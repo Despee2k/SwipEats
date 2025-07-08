@@ -5,7 +5,7 @@ import (
 	"math/big"
 )
 
-const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 func GenerateGroupCode(length int) (string, error) {
 	groupCode := make([]byte, length)

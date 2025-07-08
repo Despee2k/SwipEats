@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/SwipEats/SwipEats/server/internal/constants"
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
@@ -34,7 +35,7 @@ func GenerateGroupCode() (string, error) {
 	return "", errors.New("failed to generate a unique group code after multiple attempts")
 }
 
-func CreateGroup(groupDto dtos.CreateGroupRequestDto) (string, error) {
+func CreateGroup(groupDto dtos.CreateGroupRequestDto, userID uint) (string, error) {
 	groupCode, err := GenerateGroupCode()
 
 	if err != nil {
@@ -45,10 +46,21 @@ func CreateGroup(groupDto dtos.CreateGroupRequestDto) (string, error) {
 		Name:         groupDto.Name,
 		LocationLat:  groupDto.LocationLat,
 		LocationLong: groupDto.LocationLong,
-		GroupCode:   groupCode,
+		GroupCode:   strings.ToUpper(groupCode),
 	}
 
-	err = repositories.CreateGroup(group, groupDto.UserID)
+	err = repositories.CreateGroup(group, userID)
+
+	if err != nil {
+		return "", err
+	}
+
+	// Automatically join the group after creation
+	err = repositories.AddUserToGroup(
+		userID,
+		group.ID,
+		true,
+	)
 
 	if err != nil {
 		return "", err

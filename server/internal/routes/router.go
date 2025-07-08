@@ -20,21 +20,27 @@ func Setup() http.Handler {
 		MaxAge:           300,
 	}))
 
+	// Landing page
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Welcome to SwipEats!"))
 	})
 
+	// Health check endpoint
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})
 
+	// Protected route example
+	// This route requires a valid JWT token to access
 	r.With(middlewares.JWTMiddleware).Get("/protected", func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value(middlewares.UserIDKey)
 		w.Write([]byte("Protected route accessed by user id: " + fmt.Sprintf("%d", userID.(uint))))
 	})
 
+	// Mounting sub-routers for different API versions
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Mount("/auth", AuthRouter())
+		r.With(middlewares.JWTMiddleware).Mount("/group", GroupRouter())
 	})
 
 	return r

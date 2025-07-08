@@ -41,9 +41,7 @@ func DeleteGroup(group *models.Group) error {
 		return gorm.ErrInvalidDB // Database connection is not established
 	}
 
-	group.DeletedAt = gorm.DeletedAt{} // Set DeletedAt to current time
-
-	result := db.Conn.Save(group)
+	result := db.Conn.Delete(group)
 	if result.Error != nil {
 		return result.Error // Error deleting group
 	}
