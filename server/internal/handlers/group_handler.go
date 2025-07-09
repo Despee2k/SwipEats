@@ -13,14 +13,22 @@ import (
 
 func CreateGroupHandler(w http.ResponseWriter, r *http.Request) {
 	var groupDto dtos.CreateGroupRequestDto
+	var errorResponse dtos.APIErrorResponse
+	var successResponse dtos.APISuccessResponse[dtos.CreateGroupResponseDto]
+
+	w.Header().Set("Content-Type", "application/json")
 
 	if err := json.NewDecoder(r.Body).Decode(&groupDto); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		errorResponse.Message = "Invalid request body"
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
 
 	if err := utils.Validate.Struct(groupDto); err != nil {
-		http.Error(w, "Validation failed: "+err.Error(), http.StatusBadRequest)
+		errorResponse.Message = "Validation failed: " + err.Error()
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
 
@@ -28,7 +36,9 @@ func CreateGroupHandler(w http.ResponseWriter, r *http.Request) {
 
 	groupCode, err := services.CreateGroup(groupDto, userID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorResponse.Message = err.Error()
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
 
@@ -36,70 +46,102 @@ func CreateGroupHandler(w http.ResponseWriter, r *http.Request) {
 		GroupCode: groupCode,
 	}
 
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
+	successResponse.Message = "Group created successfully"
+	successResponse.Data = response
+
+	json.NewEncoder(w).Encode(successResponse)
 	w.WriteHeader(http.StatusCreated)
 }
 
 func JoinGroupHandler(w http.ResponseWriter, r *http.Request) {
+	var errorResponse dtos.APIErrorResponse
+	var successResponse dtos.APISuccessResponse[dtos.JoinGroupResponseDto]
+
 	groupCode := chi.URLParam(r, "group_code")
 
 	userID := r.Context().Value(middlewares.UserIDKey).(uint)
 
+	w.Header().Set("Content-Type", "application/json")
+
 	response, err := services.JoinGroup(groupCode, userID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorResponse.Message = err.Error()
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
+	successResponse.Message = "Group joined successfully"
+	successResponse.Data = *response
+
+	json.NewEncoder(w).Encode(successResponse)
+	
 	w.WriteHeader(http.StatusOK)
 }
 
 func LeaveGroupHandler(w http.ResponseWriter, r *http.Request) {
+	var errorResponse dtos.APIErrorResponse
+	var successResponse dtos.APISuccessResponse[any]
+
 	userID := r.Context().Value(middlewares.UserIDKey).(uint)
 	groupCode := chi.URLParam(r, "group_code")
 
 	if groupCode == "" {
-		http.Error(w, "Group code is required", http.StatusBadRequest)
+		errorResponse.Message = "Group code is required"
+		json.NewEncoder(w).Encode(errorResponse)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	err := services.LeaveGroup(userID, groupCode)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorResponse.Message = err.Error()
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
+
+	successResponse.Message = "Left group successfully"
+	json.NewEncoder(w).Encode(successResponse)
 
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func GetGroupMembersHandler(w http.ResponseWriter, r *http.Request) {
+	var errorResponse dtos.APIErrorResponse
+	var successResponse dtos.APISuccessResponse[[]dtos.UserMembershipResponseDto]
+
 	userID := r.Context().Value(middlewares.UserIDKey).(uint)
 	groupCode := chi.URLParam(r, "group_code")
-
+	
+	w.Header().Set("Content-Type", "application/json")
+	
 	if groupCode == "" {
-		http.Error(w, "Group code is required", http.StatusBadRequest)
+		errorResponse.Message = "Group code is required"
+		json.NewEncoder(w).Encode(errorResponse)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	members, err := services.GetGroupMembers(groupCode, userID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorResponse.Message = err.Error()
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
 
 	if err := json.NewEncoder(w).Encode(members); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		errorResponse.Message = "Failed to encode response"
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+
+	successResponse.Message = "Group members retrieved successfully"
+	successResponse.Data = members
+
+	json.NewEncoder(w).Encode(successResponse)
+
 	w.WriteHeader(http.StatusOK)
 }
