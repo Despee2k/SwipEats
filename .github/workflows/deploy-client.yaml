@@ -40,3 +40,4 @@ jobs:
           source: "client/dist/frontend/browser/*"
           target: "~/swipeats.dcism.org/"
           overwrite: true
+          strip_components: 1
