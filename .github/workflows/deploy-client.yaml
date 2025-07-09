@@ -50,8 +50,9 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~/swipeats.dcism.org/dist/frontend/server
+            cd ~/swipeats.dcism.org/client
             git reset --hard && git pull origin main
-            pm2 stop swipeats
-            pm2 start npm --name swipeats -- run start
+            npm i
+            pm2 stop swipeats || true
+            pm2 start --name swipeats -- npx ng serve --host 0.0.0.0 --port 42110
             pm2 save
