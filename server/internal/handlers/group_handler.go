@@ -10,7 +10,6 @@ import (
 	"github.com/SwipEats/SwipEats/server/internal/services"
 	"github.com/SwipEats/SwipEats/server/internal/utils"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-playground/validator/v10"
 )
 
 func CreateGroupHandler(w http.ResponseWriter, r *http.Request) {
@@ -28,15 +27,9 @@ func CreateGroupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := utils.Validate.Struct(groupDto); err != nil {
-		validationErrors := err.(validator.ValidationErrors)
-		details := make(map[string]string)
+		message, details := utils.GetValidationErrorDetails(err)
 
-		for _, fieldError := range validationErrors {
-			fieldName := fieldError.Field()
-			details[fieldName] = fieldError.Tag()
-		}
-
-		errorResponse.Message = "Validation failed: " + err.Error()
+		errorResponse.Message = message
 		errorResponse.Details = details
 
 		w.WriteHeader(http.StatusBadRequest)
