@@ -53,4 +53,3 @@ jobs:
             cd ~/swipeats.dcism.org/dist/frontend/server
             pkill -f "node server.mjs" || true
             nohup node server.mjs > ~/swipeats.log 2>&1 &
-            pm2 save
