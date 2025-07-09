@@ -52,5 +52,5 @@ jobs:
           script: |
             cd ~/swipeats.dcism.org/dist/frontend/server
             pm2 stop swipeats-client || true
-            pm2 start server.mjs --name swipeats-client --interpreter=node
+            pm2 start --name swipeats-client -- node server.mjs
             pm2 save
