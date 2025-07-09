@@ -13,8 +13,14 @@ import (
 )
 
 func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+	var errorResponse dtos.APIErrorResponse
+	var successResponse dtos.APISuccessResponse[dtos.UserUpdateResponseDto]
+
+	
 	var filePath string
 	var err error
+	
+	w.Header().Set("Content-Type", "application/json")
 
 	user := dtos.UserUpdateRequestDto{
 		Name:     r.FormValue("name"),
@@ -27,13 +33,16 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	if !user.ClearImage {
 		filePath, err = services.UploadProfilePicture(r, userID)
 		if err != nil && err != http.ErrMissingFile {
-			http.Error(w, "Failed to upload profile picture: "+err.Error(), http.StatusInternalServerError)
+			errorResponse.Message = "Failed to upload profile picture: " + err.Error()
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	}
 
 	if err := services.UpdateUser(user, userID, filePath); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		errorResponse.Message = "Failed to update user: " + err.Error()
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
 
@@ -47,10 +56,10 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		response.ProfilePicture = filePath
 	}
 
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-		return
-	}
+	successResponse.Message = "User updated successfully"
+	successResponse.Data = response
+
+	json.NewEncoder(w).Encode(successResponse)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }

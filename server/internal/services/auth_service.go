@@ -10,25 +10,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func RegisterUser(user *dtos.UserRegisterRequestDto) error {
+func RegisterUser(user *dtos.UserRegisterRequestDto) (*models.User, error) {
 	existingUser, err := repositories.GetUserByEmail(user.Email)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if existingUser != nil {
-		return errors.New("user already exists")
+		return nil, errors.New("user already exists")
 	}
 
 	if user.Password != user.ConfirmPassword {
-		return bcrypt.ErrMismatchedHashAndPassword // Passwords do not match
+		return nil, bcrypt.ErrMismatchedHashAndPassword // Passwords do not match
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	newUser := &models.User{
@@ -36,7 +36,7 @@ func RegisterUser(user *dtos.UserRegisterRequestDto) error {
 		Password: string(hashedPassword),
 	}
 
-	return repositories.CreateUser(newUser)
+	return newUser, repositories.CreateUser(newUser)
 }
 
 func LoginUser(user *dtos.UserLoginRequestDto) (string, error) {
@@ -47,12 +47,12 @@ func LoginUser(user *dtos.UserLoginRequestDto) (string, error) {
 	}
 
 	if existingUser == nil {
-		return "", bcrypt.ErrMismatchedHashAndPassword // User not found
+		return "", errors.New("invalid login credentials")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(user.Password))
 	if err != nil {
-		return "", err
+		return "", errors.New("invalid login credentials")
 	}
 
 	// Generate JWT token
