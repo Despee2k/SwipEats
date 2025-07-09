@@ -54,5 +54,5 @@ jobs:
             git reset --hard && git pull origin main
             npm i
             pm2 stop swipeats || true
-            pm2 start --name swipeats -- npx ng serve --host 0.0.0.0 --port 42110
+            pm2 npx start --name swipeats -- ng serve --host 0.0.0.0 --port 42110
             pm2 save
