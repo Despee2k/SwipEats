@@ -1,10 +1,12 @@
 package handlers
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
+
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
 	"github.com/SwipEats/SwipEats/server/internal/services"
+	"github.com/SwipEats/SwipEats/server/internal/utils"
 )
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
@@ -12,6 +14,11 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&user);err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := utils.Validate.Struct(user); err != nil {
+		http.Error(w, "Validation failed: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -28,6 +35,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := utils.Validate.Struct(user); err != nil {
+		http.Error(w, "Validation failed: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 

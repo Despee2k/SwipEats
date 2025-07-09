@@ -7,6 +7,7 @@ import (
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
 	"github.com/SwipEats/SwipEats/server/internal/middlewares"
 	"github.com/SwipEats/SwipEats/server/internal/services"
+	"github.com/SwipEats/SwipEats/server/internal/utils"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -15,6 +16,11 @@ func CreateGroupHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&groupDto); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := utils.Validate.Struct(groupDto); err != nil {
+		http.Error(w, "Validation failed: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 

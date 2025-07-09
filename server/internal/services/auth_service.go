@@ -47,12 +47,12 @@ func LoginUser(user *dtos.UserLoginRequestDto) (string, error) {
 	}
 
 	if existingUser == nil {
-		return "", bcrypt.ErrMismatchedHashAndPassword // User not found
+		return "", errors.New("invalid login credentials")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(user.Password))
 	if err != nil {
-		return "", err
+		return "", errors.New("invalid login credentials")
 	}
 
 	// Generate JWT token
