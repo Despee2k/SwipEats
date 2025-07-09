@@ -40,7 +40,7 @@ func Setup() http.Handler {
 
 	// Mounting sub-routers for different API versions
 	r.Route("/api/v1", func(r chi.Router) {
-		r.Get("/uploads/{userID}", handlers.GetProfilePictureHandler)
+		r.Get("/uploads/{email}", handlers.GetProfilePictureHandler)
 
 		r.Mount("/auth", AuthRouter())
 		r.With(middlewares.JWTMiddleware).Mount("/user", UserRouter())

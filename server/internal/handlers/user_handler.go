@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
 	"github.com/SwipEats/SwipEats/server/internal/middlewares"
@@ -57,15 +56,9 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetProfilePictureHandler(w http.ResponseWriter, r *http.Request) {
-	userIDStr := chi.URLParam(r, "userID")
+	email := chi.URLParam(r, "email")
 
-	userID, err := strconv.ParseUint(userIDStr, 10, 32)
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
-	user, err := services.GetUserByID(uint(userID))
+	user, err := services.GetUserByEmail(email)
 	if err != nil {
 		http.Error(w, "User not found", http.StatusNotFound)
 		return

@@ -107,3 +107,23 @@ func GetUserByID(userID uint) (*dtos.UserResponseDto, error) {
 
 	return response, nil
 }
+
+func GetUserByEmail(email string) (*dtos.UserResponseDto, error) {
+	user, err := repositories.GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, errors.New("user not found")
+	}
+
+	response := &dtos.UserResponseDto{
+		ID:             user.ID,
+		Name:           user.Name,
+		Email:          user.Email,
+		ProfilePicture: user.ProfilePicture,
+	}
+
+	return response, nil
+}
