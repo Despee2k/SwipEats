@@ -1,10 +1,10 @@
 package services
 
 import (
-	"errors"
 	"strings"
 
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
+	"github.com/SwipEats/SwipEats/server/internal/errors"
 	"github.com/SwipEats/SwipEats/server/internal/repositories"
 )
 
@@ -15,7 +15,7 @@ func JoinGroup(groupCode string, userID uint) (*dtos.JoinGroupResponseDto, error
 	}
 
 	if group == nil {
-		return nil, errors.New("group not found")
+		return nil, errors.ErrGroupNotFound
 	}
 
 	membership, err := repositories.GetGroupMembershipByUserIDAndGroupID(userID, group.ID)
@@ -24,7 +24,7 @@ func JoinGroup(groupCode string, userID uint) (*dtos.JoinGroupResponseDto, error
 	}
 
 	if membership != nil {
-		return nil, errors.New("user is already a member of the group")
+		return nil, errors.ErrUserAlreadyInGroup
 	}
 
 	err = repositories.AddUserToGroup(userID, group.ID, false)
@@ -44,7 +44,7 @@ func LeaveGroup(userID uint, groupCode string) error {
 	}
 
 	if group == nil {
-		return errors.New("group not found")
+		return errors.ErrGroupNotFound
 	}
 
 	membership, err := repositories.GetGroupMembershipByUserIDAndGroupID(userID, group.ID)
@@ -54,7 +54,7 @@ func LeaveGroup(userID uint, groupCode string) error {
 	}
 
 	if membership == nil {
-		return errors.New("user is not a member of the group")
+		return errors.ErrUserNotInGroup
 	}
 
 	err = repositories.RemoveUserFromGroup(membership)
@@ -72,7 +72,7 @@ func GetGroupMembers(groupCode string, userID uint) ([]dtos.UserMembershipRespon
 	}
 
 	if group == nil {
-		return nil, errors.New("group not found")
+		return nil, errors.ErrGroupNotFound
 	}
 
 	confirmMembership, err := repositories.GetGroupMembershipByUserIDAndGroupID(userID, group.ID)
@@ -81,7 +81,7 @@ func GetGroupMembers(groupCode string, userID uint) ([]dtos.UserMembershipRespon
 	}
 
 	if confirmMembership == nil {
-		return nil, errors.New("user is not a member of the group")
+		return nil, errors.ErrUserNotInGroup
 	}
 
 	memberships, err := repositories.GetGroupMembershipsByGroupID(group.ID)

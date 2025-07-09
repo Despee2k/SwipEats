@@ -5,10 +5,12 @@ import (
 	"net/http"
 
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
+	"github.com/SwipEats/SwipEats/server/internal/errors"
 	"github.com/SwipEats/SwipEats/server/internal/middlewares"
 	"github.com/SwipEats/SwipEats/server/internal/services"
 	"github.com/SwipEats/SwipEats/server/internal/utils"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/validator/v10"
 )
 
 func CreateGroupHandler(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +28,17 @@ func CreateGroupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := utils.Validate.Struct(groupDto); err != nil {
+		validationErrors := err.(validator.ValidationErrors)
+		details := make(map[string]string)
+
+		for _, fieldError := range validationErrors {
+			fieldName := fieldError.Field()
+			details[fieldName] = fieldError.Tag()
+		}
+
 		errorResponse.Message = "Validation failed: " + err.Error()
+		errorResponse.Details = details
+
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(errorResponse)
 		return
@@ -36,8 +48,17 @@ func CreateGroupHandler(w http.ResponseWriter, r *http.Request) {
 
 	groupCode, err := services.CreateGroup(groupDto, userID)
 	if err != nil {
-		errorResponse.Message = err.Error()
-		w.WriteHeader(http.StatusInternalServerError)
+		switch err {
+			case errors.ErrUnableToGenerateGroupCode:
+				errorResponse.Message = "Failed to generate a unique group code"
+				w.WriteHeader(http.StatusInternalServerError)
+			case errors.ErrGroupNotFound:
+				errorResponse.Message = "Group not found"
+				w.WriteHeader(http.StatusNotFound)
+			default:
+				errorResponse.Message = "Failed to create group"
+				w.WriteHeader(http.StatusInternalServerError)
+		}
 		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
@@ -65,8 +86,18 @@ func JoinGroupHandler(w http.ResponseWriter, r *http.Request) {
 
 	response, err := services.JoinGroup(groupCode, userID)
 	if err != nil {
-		errorResponse.Message = err.Error()
-		w.WriteHeader(http.StatusInternalServerError)
+		switch err {
+			case errors.ErrGroupNotFound:
+				errorResponse.Message = "Group not found"
+				w.WriteHeader(http.StatusNotFound)
+			case errors.ErrUserAlreadyInGroup:
+				errorResponse.Message = "User is already a member of the group"
+				w.WriteHeader(http.StatusConflict)
+			default:
+				errorResponse.Message = "Failed to join group"
+				w.WriteHeader(http.StatusInternalServerError)
+		}
+
 		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
@@ -95,8 +126,18 @@ func LeaveGroupHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := services.LeaveGroup(userID, groupCode)
 	if err != nil {
-		errorResponse.Message = err.Error()
-		w.WriteHeader(http.StatusInternalServerError)
+		switch err {
+			case errors.ErrGroupNotFound:
+				errorResponse.Message = "Group not found"
+				w.WriteHeader(http.StatusNotFound)
+			case errors.ErrUserNotInGroup:
+				errorResponse.Message = "User is not a member of the group"
+				w.WriteHeader(http.StatusBadRequest)
+			default:
+				errorResponse.Message = "Failed to leave group"
+				w.WriteHeader(http.StatusInternalServerError)
+		}
+
 		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
@@ -125,15 +166,18 @@ func GetGroupMembersHandler(w http.ResponseWriter, r *http.Request) {
 
 	members, err := services.GetGroupMembers(groupCode, userID)
 	if err != nil {
-		errorResponse.Message = err.Error()
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(errorResponse)
-		return
-	}
+		switch err {
+			case errors.ErrGroupNotFound:
+				errorResponse.Message = "Group not found"
+				w.WriteHeader(http.StatusNotFound)
+			case errors.ErrUserNotInGroup:
+				errorResponse.Message = "User is not a member of the group"
+				w.WriteHeader(http.StatusBadRequest)
+			default:
+				errorResponse.Message = "Failed to retrieve group members"
+				w.WriteHeader(http.StatusInternalServerError)
+		}
 
-	if err := json.NewEncoder(w).Encode(members); err != nil {
-		errorResponse.Message = "Failed to encode response"
-		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}

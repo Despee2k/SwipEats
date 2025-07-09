@@ -1,11 +1,11 @@
 package services
 
 import (
-	"errors"
 	"strings"
 
 	"github.com/SwipEats/SwipEats/server/internal/constants"
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
+	"github.com/SwipEats/SwipEats/server/internal/errors"
 	"github.com/SwipEats/SwipEats/server/internal/models"
 	"github.com/SwipEats/SwipEats/server/internal/repositories"
 	"github.com/SwipEats/SwipEats/server/internal/utils"
@@ -32,7 +32,7 @@ func GenerateGroupCode() (string, error) {
 		}
 	}
 
-	return "", errors.New("failed to generate a unique group code after multiple attempts")
+	return "", errors.ErrUnableToGenerateGroupCode
 }
 
 func CreateGroup(groupDto dtos.CreateGroupRequestDto, userID uint) (string, error) {

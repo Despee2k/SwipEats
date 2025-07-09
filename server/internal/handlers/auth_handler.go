@@ -5,8 +5,10 @@ import (
 	"net/http"
 
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
+	"github.com/SwipEats/SwipEats/server/internal/errors"
 	"github.com/SwipEats/SwipEats/server/internal/services"
 	"github.com/SwipEats/SwipEats/server/internal/utils"
+	"github.com/go-playground/validator/v10"
 )
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +26,17 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := utils.Validate.Struct(user); err != nil {
+		validationErrors := err.(validator.ValidationErrors)
+		details := make(map[string]string)
+
+		for _, fieldError := range validationErrors {
+			fieldName := fieldError.Field()
+			details[fieldName] = fieldError.Tag()
+		}
+
 		errorResponse.Message = "Validation failed: " + err.Error()
+		errorResponse.Details = details
+
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(errorResponse)
 		return
@@ -32,8 +44,23 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	new_user, err := services.RegisterUser(&user)
 	if err != nil {
-		errorResponse.Message = err.Error()
-		w.WriteHeader(http.StatusInternalServerError)
+		switch err {
+			case errors.ErrEmailAlreadyInUse:
+				errorResponse.Message = "Email already in use"
+				errorResponse.Details = map[string]string{"email": "Already in use."}
+				w.WriteHeader(http.StatusConflict)
+			case errors.ErrPasswordsDoNotMatch:
+				errorResponse.Message = "Passwords do not match"
+				errorResponse.Details = map[string]string{
+					"password": "Do not match.", 
+					"confirm_password": "Do not match.",
+				}
+				w.WriteHeader(http.StatusBadRequest)
+			default:
+				errorResponse.Message = "Failed to register user"
+				w.WriteHeader(http.StatusInternalServerError)
+		}
+		
 		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
@@ -63,7 +90,17 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := utils.Validate.Struct(user); err != nil {
+		err := err.(validator.ValidationErrors)
+		details := make(map[string]string)
+
+		for _, fieldError := range err {
+			fieldName := fieldError.Field()
+			details[fieldName] = fieldError.Tag()
+		}
+
 		errorResponse.Message = "Validation failed: " + err.Error()
+		errorResponse.Details = details
+
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(errorResponse)
 		return
@@ -71,7 +108,18 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	token, err := services.LoginUser(&user)
 	if err != nil {
-		errorResponse.Message = err.Error()
+
+		switch err {
+			case errors.ErrInvalidCredentials:
+				errorResponse.Message = "Invalid login credentials"
+				errorResponse.Details = map[string]string{
+					"email": "invalid", 
+					"password": "invalid",
+				}
+			default:
+				errorResponse.Message = "Failed to login user"
+		}
+
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(errorResponse)
 		return

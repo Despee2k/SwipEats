@@ -1,12 +1,11 @@
 package services
 
 import (
-	"errors"
-
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
 	"github.com/SwipEats/SwipEats/server/internal/models"
 	"github.com/SwipEats/SwipEats/server/internal/repositories"
 	"github.com/SwipEats/SwipEats/server/internal/utils"
+	"github.com/SwipEats/SwipEats/server/internal/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,11 +17,11 @@ func RegisterUser(user *dtos.UserRegisterRequestDto) (*models.User, error) {
 	}
 
 	if existingUser != nil {
-		return nil, errors.New("user already exists")
+		return nil, errors.ErrEmailAlreadyInUse
 	}
 
 	if user.Password != user.ConfirmPassword {
-		return nil, bcrypt.ErrMismatchedHashAndPassword // Passwords do not match
+		return nil, errors.ErrPasswordsDoNotMatch // Passwords do not match
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -47,12 +46,12 @@ func LoginUser(user *dtos.UserLoginRequestDto) (string, error) {
 	}
 
 	if existingUser == nil {
-		return "", errors.New("invalid login credentials")
+		return "", errors.ErrInvalidCredentials
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(user.Password))
 	if err != nil {
-		return "", errors.New("invalid login credentials")
+		return "", errors.ErrInvalidCredentials
 	}
 
 	// Generate JWT token

@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/SwipEats/SwipEats/server/internal/constants"
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
+	"github.com/SwipEats/SwipEats/server/internal/errors"
 	"github.com/SwipEats/SwipEats/server/internal/repositories"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -39,7 +39,7 @@ func UploadProfilePicture(r *http.Request, userID uint) (string, error) {
 
 	_, err = io.Copy(dst, file)
 	if err != nil {
-		return "", errors.New("could not save file: " + err.Error())
+		return "", errors.ErrFileCouldNotSave
 	}
 
 	return dstPath, nil
@@ -51,6 +51,10 @@ func UpdateUser(user dtos.UserUpdateRequestDto, userID uint, filePath string) er
 		return err
 	}
 
+	if existingUser == nil {
+		return errors.ErrUserNotFound
+	}
+
 	// Update the existing user with the new values
 	existingUser.Name = user.Name
 
@@ -59,7 +63,7 @@ func UpdateUser(user dtos.UserUpdateRequestDto, userID uint, filePath string) er
 			absPath, _ := filepath.Abs(existingUser.ProfilePicture)
 			err = os.Remove(absPath) // Remove old profile picture if it exists
 			if err != nil {
-				return errors.New("could not remove old profile picture: " + err.Error())
+				return errors.ErrFileCountNotBeDeleted
 			}
 		}
 
@@ -95,7 +99,7 @@ func GetUserByID(userID uint) (*dtos.UserResponseDto, error) {
 	}
 
 	if user == nil {
-		return nil, errors.New("user not found")
+		return nil, errors.ErrUserNotFound
 	}
 
 	response := &dtos.UserResponseDto{
@@ -115,7 +119,7 @@ func GetUserByEmail(email string) (*dtos.UserResponseDto, error) {
 	}
 
 	if user == nil {
-		return nil, errors.New("user not found")
+		return nil, errors.ErrUserNotFound
 	}
 
 	response := &dtos.UserResponseDto{

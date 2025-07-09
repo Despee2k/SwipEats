@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
+	"github.com/SwipEats/SwipEats/server/internal/errors"
 	"github.com/SwipEats/SwipEats/server/internal/middlewares"
 	"github.com/SwipEats/SwipEats/server/internal/services"
 	"github.com/go-chi/chi/v5"
@@ -34,14 +35,31 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		filePath, err = services.UploadProfilePicture(r, userID)
 		if err != nil && err != http.ErrMissingFile {
 			errorResponse.Message = "Failed to upload profile picture: " + err.Error()
+			errorResponse.Details = map[string]string{"file": "Upload failed"}
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	}
 
 	if err := services.UpdateUser(user, userID, filePath); err != nil {
-		errorResponse.Message = "Failed to update user: " + err.Error()
-		w.WriteHeader(http.StatusInternalServerError)
+		switch err {
+			case errors.ErrUserNotFound:
+				errorResponse.Message = "User not found"
+				errorResponse.Details = map[string]string{"id": "User does not exist"}
+				w.WriteHeader(http.StatusNotFound)
+			case errors.ErrFileCouldNotSave:
+				errorResponse.Message = "File could not be saved"
+				errorResponse.Details = map[string]string{"file": "Could not save file"}
+				w.WriteHeader(http.StatusBadRequest)
+			case errors.ErrFileCountNotBeDeleted:
+				errorResponse.Message = "File could not be deleted"
+				errorResponse.Details = map[string]string{"file": "Could not delete file"}
+				w.WriteHeader(http.StatusInternalServerError)
+			default:
+				errorResponse.Message = "Failed to update user"
+				w.WriteHeader(http.StatusInternalServerError)
+		}
+
 		json.NewEncoder(w).Encode(errorResponse)
 		return
 	}
