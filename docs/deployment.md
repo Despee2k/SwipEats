@@ -17,7 +17,7 @@ git clone --filter=blob:none --no-checkout https://github.com/SwipEats/SwipEats.
 cd SwipEats
 
 git sparse-checkout init --cone
-git sparse-checkout set server
+git sparse-checkout set ${{ FOLDER_PATH }}
 git checkout main
 
 mv * .[^.]* ..
@@ -26,7 +26,7 @@ rmdir SwipEats
 ```
 
 > \[!NOTE]
-> This clones only the `SwipEats/server` directory to save space and simplify deployment.
+> Replace `${{ FOLDER_PATH }}` with `client` if front-end deployment, and `server` if back-end deployment. This clones only the `SwipEats/server` directory to save space and simplify deployment.
 
 ### Step 3: Configure `.htaccess`
 
