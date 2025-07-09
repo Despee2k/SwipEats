@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-login',
@@ -18,19 +19,17 @@ export class Login {
   error = '';
   message = '';
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router, private toastr: ToastrService) {}
 
   onLoginSubmit() {
     this.auth.login({ email: this.email, password: this.password }).subscribe({
       next: (res) => {
-        this.error = '';
-        this.message = 'Login successful! Redirecting...';
+        this.toastr.success('Login successful! Redirecting...', 'Success');
         this.auth.storeToken(res.token);
         setTimeout(() => this.router.navigate(['/lobby']), 1500);
       },
       error: (err) => {
-        this.message = '';
-        this.error = err?.error || 'Login failed. Check credentials.';
+        this.toastr.error(err?.error?.message || 'Login failed. Check credentials.', 'Error');
       }
     });
   }
