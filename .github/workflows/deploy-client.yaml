@@ -42,7 +42,7 @@ jobs:
           overwrite: true
           strip_components: 1
 
-      - name: Deploy SwipEats Go Server
+      - name: Deploy SwipEats Client Server
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -52,5 +52,24 @@ jobs:
           script: |
             cd ~/swipeats.dcism.org/dist/frontend/server
             pm2 stop swipeats-client || true
+            cat > ecosystem.config.js << 'EOF'
+            module.exports = {
+              apps: [
+                {
+                  name: 'swipeats-client',           // PM2 process name
+                  script: 'server.mjs',              // The entry point of your SSR server
+                  interpreter: 'node',               // Explicitly use Node.js
+                  env: {
+                    NODE_ENV: 'production',
+                    PORT: 42110                      // Custom port (optional)
+                  },
+                  watch: false,                      // Set to true if you want it to auto-restart on file changes
+                  max_restarts: 5,
+                  restart_delay: 3000,
+                  merge_logs: true
+                }
+              ]
+            };
+            EOF
             pm2 start --name swipeats-client -- node server.mjs
             pm2 save
