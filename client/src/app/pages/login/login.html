@@ -17,7 +17,7 @@
 </div>
 
 <div
-    *ngIf="showElement" @fadeIn
+  *ngIf="showElement" @fadeIn
   class="transition-all duration-500 delay-500 ease-in-out justify-center flex flex-col items-center px-6 py-8 bg-neutral-900 mx-4 rounded-md"
 >
   <p class="text-xl font-semibold">Welcome Back!</p>
@@ -31,7 +31,7 @@
       id="email"
       name="email"
       [required]="true"
-      placeholder="Email"
+      placeholder="your@email.com"
       [(modelValue)]="email"
     ></app-input-field>
     <!-- Password -->
@@ -41,13 +41,13 @@
       id="password"
       name="password"
       [required]="true"
-      placeholder="Password"
+      placeholder="Enter your password"
       [(modelValue)]="password"
     ></app-input-field>
 
     <!-- Sign Up -->
     <p class="text-center text-sm mt-2">
-      Don’t have an account? <a routerLink="/signup" class="underline">Sign up</a>
+      Don’t have an account? <a routerLink="/signup" class="underline">Sign up.</a>
     </p>
 
     <!-- Login Button -->
@@ -55,7 +55,7 @@
       type="submit"
       class="w-full bg-[#FF4D30] hover:bg-[#e0432a] text-white font-semibold py-2 rounded-sm transition"
     >
-      Log in
+      Sign in
     </button>
   </form>
 </div>

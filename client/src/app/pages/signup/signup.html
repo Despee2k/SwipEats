@@ -1,61 +1,72 @@
-<div class="min-h-screen flex items-center justify-center bg-[#121212] px-4">
-  <form
-    (ngSubmit)="onSignupSubmit()"
-    #signupForm="ngForm"
-    class="w-full max-w-xs space-y-5 text-white"
+<div
+  #logoDiv
+  class="pt-12 pb-4 justify-start w-full flex flex-col items-center text-white transition-all duration-700 ease-in-out"
+>
+  <img
+    #logo
+    src="swipeats-logo-white.png"
+    alt="logo"
+    class="transition-all duration-500 size-20"
+  />
+  <p
+    #logoText
+    class="text-xl mt-4 font-bold transition-all duration-500"
   >
-    <p class="text-center text-sm">Create an account in seconds!</p>
+    swipeats
+  </p>
+</div>
 
-    <div>
-      <label for="email" class="block mb-1 text-sm">Email</label>
-      <input
-        id="email"
-        name="email"
-        type="email"
-        [(ngModel)]="email"
-        required
-        placeholder="Email"
-        class="w-full px-4 py-2 rounded bg-gray-300 text-black"
-      />
-    </div>
+<div
+    *ngIf="showElement" @fadeIn
+  class="transition-all duration-500 delay-500 ease-in-out justify-center flex flex-col items-center px-6 py-8 bg-neutral-900 mx-4 rounded-md"
+>
+  <p class="text-xl font-semibold">Create Account!</p>
+  <p class="text-center mb-4 text-sm text-neutral-400">Start your dining journey with friends.</p>
 
-    <div>
-      <label for="password" class="block mb-1 text-sm">Password</label>
-      <input
-        id="password"
-        name="password"
-        type="password"
-        [(ngModel)]="password"
-        required
-        placeholder="Password"
-        class="w-full px-4 py-2 rounded bg-gray-300 text-black"
-      />
-    </div>
+  <form class="w-full flex flex-col gap-5" (ngSubmit)="onSignupSubmit()" #signupForm="ngForm">
+    <!-- Email -->
+    <app-input-field
+      label="Email"
+      type="email"
+      id="email"
+      name="email"
+      [required]="true"
+      placeholder="johndoe@email.com"
+      [(modelValue)]="email"
+    ></app-input-field>
+    <!-- Password -->
+    <app-input-field
+      label="Password"
+      type="password"
+      id="password"
+      name="password"
+      [required]="true"
+      placeholder="Create a password"
+      [(modelValue)]="password"
+    ></app-input-field>
 
-    <div>
-      <label for="confirmPassword" class="block mb-1 text-sm">Confirm Password</label>
-      <input
-        id="confirmPassword"
-        name="confirmPassword"
-        type="password"
-        [(ngModel)]="confirmPassword"
-        required
-        placeholder="Password"
-        class="w-full px-4 py-2 rounded bg-gray-300 text-black"
-      />
-    </div>
+    <!-- Password -->
+    <app-input-field
+      label="Confirm Password"
+      type="password"
+      id="password"
+      name="password"
+      [required]="true"
+      placeholder="Confirm your password"
+      [(modelValue)]="password"
+    ></app-input-field>
 
-    <p class="text-center text-sm">
-      Already have an account?
-      <a routerLink="/login" class="underline">Log in</a>
+    <!-- Login -->
+    <p class="text-center text-sm mt-2">
+      Already have an account? <a routerLink="/login" class="underline">Sign in.</a>
     </p>
 
+    <!-- Sign up Button -->
     <button
       type="submit"
-      [disabled]="signupForm.invalid"
-      class="w-full py-2 rounded-full bg-[#FF5C39] text-white font-semibold"
+      class="w-full bg-[#FF4D30] hover:bg-[#e0432a] text-white font-semibold py-2 rounded-sm transition"
     >
-      Sign up
+      Sign Up
     </button>
   </form>
 </div>
