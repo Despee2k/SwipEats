@@ -1,6 +1,6 @@
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-landing',
@@ -11,15 +11,19 @@ import { Router, RouterLink } from '@angular/router';
 export class Landing {
   moved = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, @Inject(PLATFORM_ID) private platformId: Object) {}
 
   ngAfterViewInit() {
-    setTimeout(() => {
-      this.moved = true;
-      setTimeout(() => {
-        this.router.navigate(['/login'])
-      }, 300)
-    }, 3000);
+    if (isPlatformBrowser(this.platformId)) {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          this.moved = true;
+          setTimeout(() => {
+            this.router.navigate(['/login'])
+          }, 300)
+        }, 3000);
+      });
+    }
   }
 
   ngOnInit() {
