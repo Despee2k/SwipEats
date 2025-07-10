@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AuthService } from '../../services/auth';
 import { Router, RouterLink } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -30,6 +30,7 @@ export class Login {
   showElement = false;
   email = '';
   password = '';
+  @ViewChild('submitButton') submitButtonRef!: ElementRef<HTMLButtonElement>;
   
   constructor(private auth: AuthService, private router: Router, private toastr: ToastrService) {}
 
@@ -39,7 +40,21 @@ export class Login {
     }, 100);
   }
 
+  disableButton() {
+    if (this.submitButtonRef.nativeElement) {
+      this.submitButtonRef.nativeElement.disabled = true; // Disable button to prevent multiple clicks
+    }
+  }
+
+  enableButton() {
+    if (this.submitButtonRef.nativeElement) {
+      this.submitButtonRef.nativeElement.disabled = false; // Enable button
+    }
+  }
+
   onLoginSubmit() {
+    this.disableButton();
+
     this.auth.login({ email: this.email, password: this.password }).subscribe({
       next: (res) => {
         this.toastr.success('Login successful! Redirecting...', 'Success');
@@ -48,6 +63,7 @@ export class Login {
       },
       error: (err) => {
         this.toastr.error(err?.error?.message || 'Login failed. Check credentials.', 'Error');
+        this.enableButton(); // Re-enable button on error
       }
     });
   }

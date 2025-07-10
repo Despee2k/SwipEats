@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -29,6 +29,7 @@ export class Signup {
   message = '';
   error = '';
   showElement = false;
+  @ViewChild('submitButton') submitButtonRef!: ElementRef<HTMLButtonElement>;
 
   constructor(private auth: AuthService, private router: Router, private toastr: ToastrService) {}
 
@@ -38,11 +39,20 @@ export class Signup {
     }, 100);
   }
 
-  onSignupSubmit() {
-    if (this.password !== this.confirmPassword) {
-      this.toastr.error('Passwords do not match.', 'Error');
-      return;
+  disableButton() {
+    if (this.submitButtonRef.nativeElement) {
+      this.submitButtonRef.nativeElement.disabled = true; // Disable button to prevent multiple clicks
     }
+  }
+
+  enableButton() {
+    if (this.submitButtonRef.nativeElement) {
+      this.submitButtonRef.nativeElement.disabled = false; // Enable button
+    }
+  }
+
+  onSignupSubmit() {
+    this.disableButton();
 
     this.auth.signup({
       email: this.email,
@@ -54,8 +64,16 @@ export class Signup {
         setTimeout(() => this.router.navigate(['/login']), 1500);
       },
       error: (err) => {
-        this.toastr.error(err?.error?.message || 'Signup failed. Please try again.', 'Error');
+        if (this.password !== this.confirmPassword) {
+          this.toastr.error('Passwords do not match.', 'Error');
+        }
+        else {
+          this.toastr.error(err?.error?.message || 'Signup failed. Please try again.', 'Error');
+        }
+        this.enableButton(); // Re-enable button on error
       }
     });
+
+    
   }
 }
