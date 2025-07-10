@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+body {
+  background-color: #121212;
+  color: white;
+}
+
 /* POSITIONING */
 .toast-center-center {
   top: 50%;
