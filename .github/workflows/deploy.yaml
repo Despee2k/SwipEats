@@ -20,7 +20,7 @@ jobs:
           port: ${{ secrets.DCISM_PORT }}
           script: |
             cd ${{ secrets.DCISM_DOMAIN }}/server
-            git reset --hard && git pull origin main
+            git reset --hard && git pull --rebase origin main
             pm2 stop swipeats
             export PATH="~/go1.24.4/bin:$PATH" # export the latest version of Go bc local version is OLD
             go build -o swipeats main.go
