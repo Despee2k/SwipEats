@@ -14,6 +14,8 @@ import (
 func Setup(gss *types.GroupSessionService) http.Handler {
 	r := chi.NewRouter()
 
+	r.Use(middlewares.RateLimiter) // Custom logger middleware
+
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PATCH", "DELETE"},
