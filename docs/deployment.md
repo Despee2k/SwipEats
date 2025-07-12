@@ -38,6 +38,8 @@ RewriteEngine on
 RewriteCond %{SERVER_PORT} 80
 RewriteRule ^.*$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
+RewriteRule ^ws/(.*) ws://127.0.0.1:{{ SERVER_PORT }}/ws/$1 [P,L]
+
 RewriteRule (.*) http://127.0.0.1:{{ SERVER_PORT }}%{REQUEST_URI} [P,L]
 ```
 
