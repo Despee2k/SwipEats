@@ -6,11 +6,12 @@ import (
 
 	"github.com/SwipEats/SwipEats/server/internal/handlers"
 	"github.com/SwipEats/SwipEats/server/internal/middlewares"
+	"github.com/SwipEats/SwipEats/server/internal/types"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 )
 
-func Setup() http.Handler {
+func Setup(gss *types.GroupSessionService) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(cors.Handler(cors.Options{
@@ -46,6 +47,9 @@ func Setup() http.Handler {
 		r.With(middlewares.JWTMiddleware).Mount("/user", UserRouter())
 		r.With(middlewares.JWTMiddleware).Mount("/group", GroupRouter())
 	})
+
+	// WebSocket route for group sessions
+	r.With(middlewares.JWTMiddleware).Get("/ws/group", handlers.MakeGroupWsHandler(gss))
 
 	return r
 }

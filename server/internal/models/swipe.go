@@ -6,7 +6,7 @@ import (
 
 type Swipe struct {
 	ID        	 uint           `json:"id" gorm:"primaryKey;autoIncrement;"`
-	IsLiked   	 bool           `json:"is_liked" gorm:"not null"`
+	IsLiked   	 bool           `json:"is_liked"`
 
 	CreatedAt 	 time.Time      `json:"created_at" gorm:"autoCreateTime;not null"`
 

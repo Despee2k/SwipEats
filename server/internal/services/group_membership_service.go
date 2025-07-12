@@ -6,6 +6,7 @@ import (
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
 	"github.com/SwipEats/SwipEats/server/internal/errors"
 	"github.com/SwipEats/SwipEats/server/internal/repositories"
+	"github.com/SwipEats/SwipEats/server/internal/types"
 )
 
 func JoinGroup(groupCode string, userID uint) (*dtos.JoinGroupResponseDto, error) {
@@ -16,6 +17,10 @@ func JoinGroup(groupCode string, userID uint) (*dtos.JoinGroupResponseDto, error
 
 	if group == nil {
 		return nil, errors.ErrGroupNotFound
+	}
+
+	if group.GroupStatus != types.GroupStatusWaiting {
+		return nil, errors.ErrGroupClosed
 	}
 
 	membership, err := repositories.GetGroupMembershipByUserIDAndGroupID(userID, group.ID)

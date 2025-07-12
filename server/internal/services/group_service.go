@@ -8,6 +8,7 @@ import (
 	"github.com/SwipEats/SwipEats/server/internal/errors"
 	"github.com/SwipEats/SwipEats/server/internal/models"
 	"github.com/SwipEats/SwipEats/server/internal/repositories"
+	"github.com/SwipEats/SwipEats/server/internal/types"
 	"github.com/SwipEats/SwipEats/server/internal/utils"
 )
 
@@ -67,4 +68,80 @@ func CreateGroup(groupDto dtos.CreateGroupRequestDto, userID uint) (string, erro
 	}
 
 	return group.GroupCode, nil
+}
+
+func StartGroupSession(groupCode string, userID uint) error {
+	group, err := repositories.GetGroupByCode(groupCode)
+	if err != nil {
+		return err
+	}
+	if group == nil {
+		return errors.ErrGroupNotFound
+	}
+
+	member, err := repositories.GetGroupMembershipByUserIDAndGroupID(userID, group.ID)
+	if err != nil {
+		return err
+	}
+
+	if member == nil {
+		return errors.ErrUserNotFound
+	}
+
+	if !member.IsOwner {
+		return errors.ErrUserNotAuthorized
+	}
+
+	group.GroupStatus = types.GroupStatusActive
+
+	if err := repositories.UpdateGroup(group); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func EndGroupSession(groupCode string, userID uint) error {
+	group, err := repositories.GetGroupByCode(groupCode)
+	if err != nil {
+		return err
+	}
+	if group == nil {
+		return errors.ErrGroupNotFound
+	}
+
+	member, err := repositories.GetGroupMembershipByUserIDAndGroupID(userID, group.ID)
+	if err != nil {
+		return err
+	}
+
+	if member == nil {
+		return errors.ErrUserNotFound
+	}
+
+	if !member.IsOwner {
+		return errors.ErrUserNotAuthorized
+	}
+
+	group.GroupStatus = types.GroupStatusClosed
+
+	if err := repositories.UpdateGroup(group); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CheckGroupActivity(groupCode string) (bool, error) {
+	group, err := repositories.GetGroupByCode(groupCode)
+	if err != nil {
+		return false, err
+	}
+	if group == nil {
+		return false, errors.ErrGroupNotFound
+	}
+
+	// Add logic to check if all group members are done swiping
+
+	return false, nil
 }

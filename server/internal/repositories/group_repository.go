@@ -3,6 +3,7 @@ package repositories
 import (
 	"github.com/SwipEats/SwipEats/server/internal/db"
 	"github.com/SwipEats/SwipEats/server/internal/models"
+	"github.com/SwipEats/SwipEats/server/internal/types"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +13,7 @@ func GetGroupByCode(groupCode string) (*models.Group, error) {
 	}
 
 	var group models.Group
-	result := db.Conn.Where("group_code = ? AND deleted_at IS NULL", groupCode).First(&group)
+	result := db.Conn.Where("group_code = ? AND deleted_at IS NULL AND group_status != ?", groupCode, types.GroupStatusClosed).First(&group)
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
@@ -34,6 +35,18 @@ func CreateGroup(group *models.Group, userID uint) error {
 		return result.Error // Error creating group
 	}
 	return nil // Group created successfully
+}
+
+func UpdateGroup(group *models.Group) error {
+	if db.Conn == nil {
+		return gorm.ErrInvalidDB // Database connection is not established
+	}
+
+	result := db.Conn.Save(group)
+	if result.Error != nil {
+		return result.Error // Error updating group
+	}
+	return nil // Group updated successfully
 }
 
 func DeleteGroup(group *models.Group) error {
