@@ -3,6 +3,7 @@ package repositories
 import (
 	"github.com/SwipEats/SwipEats/server/internal/db"
 	"github.com/SwipEats/SwipEats/server/internal/models"
+	"github.com/SwipEats/SwipEats/server/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -40,8 +41,10 @@ func GetNearbyRestaurants(lat float64, long float64, radius int) ([]models.Resta
 		return nil, gorm.ErrInvalidDB // Database connection is not established
 	}
 
+	bounds := utils.GetLatLongBoundsMeters(lat, long, float64(radius))
+
 	var restaurants []models.Restaurant
-	result := db.Conn.Where("ST_Distance_Sphere(location, ST_MakePoint(?, ?)) <= ?", long, lat, radius).Find(&restaurants)
+	result := db.Conn.Where("location_lat BETWEEN ? AND ? AND location_long BETWEEN ? AND ?", bounds.MinLat, bounds.MaxLat, bounds.MinLong, bounds.MaxLong).Find(&restaurants)
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {

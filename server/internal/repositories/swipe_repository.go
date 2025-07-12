@@ -86,6 +86,67 @@ func GetUnfinishedGroupSwipes(groupID uint) ([]models.Swipe, error) {
 	return swipes, nil
 }
 
+func GetSwipesByGroupRestaurant(groupRestaurantID uint) ([]models.Swipe, error) {
+	if db.Conn == nil {
+		return nil, gorm.ErrInvalidDB // Database connection is not established
+	}
+
+	var swipes []models.Swipe
+	result := db.Conn.Where("group_restaurant_id = ? AND deleted_at IS NULL", groupRestaurantID).Find(&swipes)
+
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil // No swipes found for group restaurant
+		}
+		return nil, result.Error // Other error
+	}
+	return swipes, nil
+}
+
+func GetLikeCountByGroupRestaurant(groupRestaurantID uint) (int, error) {
+	if db.Conn == nil {
+		return 0, gorm.ErrInvalidDB // Database connection is not established
+	}
+
+	var count int64
+	result := db.Conn.Model(&models.Swipe{}).Where("group_restaurant_id = ? AND is_liked = ? AND deleted_at IS NULL", groupRestaurantID, true).Count(&count)
+
+	if result.Error != nil {
+		return 0, result.Error // Error counting swipes
+	}
+	return int(count), nil // Return the count of swipes
+}
+func GetSwipeCountByUserAndGroup(userID uint, groupID uint) (int, error) {
+	if db.Conn == nil {
+		return 0, gorm.ErrInvalidDB // Database connection is not established
+	}
+
+	var count int64
+	result := db.Conn.Model(&models.Swipe{}).Where("user_id = ? AND group_id = ? AND deleted_at IS NULL", userID, groupID).Count(&count)
+
+	if result.Error != nil {
+		return 0, result.Error // Error counting swipes
+	}
+	return int(count), nil // Return the count of swipes
+}
+
+func GetSwipeByUserAndGroupRestaurantID(userID uint, groupRestaurantID uint) (*models.Swipe, error) {
+	if db.Conn == nil {
+		return nil, gorm.ErrInvalidDB // Database connection is not established
+	}
+
+	var swipe models.Swipe
+	result := db.Conn.Where("user_id = ? AND group_restaurant_id = ? AND deleted_at IS NULL", userID, groupRestaurantID).First(&swipe)
+
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil // Swipe not found
+		}
+		return nil, result.Error // Other error
+	}
+	return &swipe, nil
+}
+
 func UpdateSwipe(swipe *models.Swipe) error {
 	if db.Conn == nil {
 		return gorm.ErrInvalidDB // Database connection is not established

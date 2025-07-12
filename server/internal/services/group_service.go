@@ -130,7 +130,15 @@ func EndGroupSession(groupCode string, userID uint) error {
 	return nil
 }
 
-func CheckGroupActivity(groupCode string) (bool, error) {
+func CheckIfGroupIsDone(groupCode string) (bool, error) {
+	restaurantCount, err := GetGroupRestaurantCountByGroupCode(groupCode)
+	if err != nil {
+		return false, err
+	}
+	if restaurantCount == 0 {
+		return false, errors.ErrNoRestaurantsFound
+	}
+
 	group, err := repositories.GetGroupByCode(groupCode)
 	if err != nil {
 		return false, err
@@ -140,6 +148,20 @@ func CheckGroupActivity(groupCode string) (bool, error) {
 	}
 
 	// Add logic to check if all group members are done swiping
+	members, err := repositories.GetGroupMembershipsByGroupID(group.ID)
+	if err != nil {
+		return false, err
+	}
 
-	return false, nil
+	for _, member := range members {
+		count, err := repositories.GetSwipeCountByUserAndGroup(member.UserID, group.ID)
+		if err != nil {
+			return false, err
+		}
+		if count < restaurantCount {
+			return false, nil // Not all members are done swiping
+		}
+	}
+
+	return true, nil
 }

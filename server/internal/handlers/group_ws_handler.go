@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/SwipEats/SwipEats/server/internal/constants"
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
@@ -35,10 +36,7 @@ func handleSendMemberUpdate(groupCode string, userID uint, session *types.GroupS
 				break
 			}
 		}
-	}
-
-	// If the group status is not waiting, we fetch the group restaurants
-	if groupStatus != types.GroupStatusWaiting {
+	} else if groupStatus != types.GroupStatusWaiting { // If the group status is not waiting, we fetch the group restaurants
 		groupRestaurants, err = services.GetGroupRestaurantsByGroupCode(groupCode)
 		if err != nil {
 			conn.WriteJSON(map[string]string{"error": err.Error()})
@@ -67,6 +65,47 @@ func getGroupStatus(groupCode string) (*types.GroupStatusEnum) {
 		return nil
 	}
 	return &group.GroupStatus
+}
+
+func endGroupSession(groupCode string, userID uint, conn *websocket.Conn, session *types.GroupSession, status *types.GroupStatusEnum) bool {
+	err := services.EndGroupSession(groupCode, userID)
+	if err != nil {
+		conn.WriteJSON(map[string]string{"error": err.Error()})
+		return false
+	}
+
+	// Update the group status to closed
+	*status = types.GroupStatusClosed
+
+	// Get the group's most liked group restaurant
+	mostLikedGroupRestaurant, err := services.GetMostLikedGroupRestaurant(groupCode)
+	if err != nil {
+		conn.WriteJSON(map[string]string{"error": err.Error()})
+		return false
+	}
+
+	response := map[string]interface{}{
+		"message":     "Group session ended",
+		"type":        "group_session_ended",
+		"group_status": *status,
+		"group_code": groupCode,
+	}
+	
+	if mostLikedGroupRestaurant != nil {
+		// Save as a match
+		if err = services.SaveMostLikedGroupRestaurant(mostLikedGroupRestaurant.ID); err != nil {
+			conn.WriteJSON(map[string]string{"error": err.Error()})
+			return false
+		}
+
+		// Add the most liked group restaurant to the response
+		response["most_liked_group_restaurant"] = mostLikedGroupRestaurant
+	}
+
+	// Broadcast the group session end message to all clients
+	services.GroupBroadcast(*session, response)
+
+	return true
 }
 
 
@@ -115,6 +154,42 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 			return
 		}
 
+		// Send the initial group status and members to the user
+		status := getGroupStatus(groupCode)
+		if status == nil {
+			log.Printf("Failed to get group status for group %s", groupCode)
+			return
+		}
+		handleSendMemberUpdate(groupCode, userID, session, conn, *status, false)
+
+		done := make(chan struct{})
+
+		// Goroutine to check if group is done
+		go func() {
+			ticker := time.NewTicker(2 * time.Second)
+			defer ticker.Stop()
+
+			for {
+				select {
+				case <-ticker.C:
+					isDone, err := services.CheckIfGroupIsDone(groupCode)
+					if err != nil {
+						continue
+					}
+					if isDone {
+						success := endGroupSession(groupCode, userID, conn, session, status)
+						if !success {
+							log.Printf("Failed to end group session for group %s", groupCode)
+							conn.WriteJSON(map[string]string{"error": "Failed to end group session"})
+						}
+						return
+					}
+				case <-done:
+					return
+				}
+			}
+		}()
+
 		// Defer cleanup when the connection is closed
 		defer func() {
 			status := getGroupStatus(groupCode)
@@ -123,20 +198,12 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 				return
 			}
 
-			log.Printf("User %d disconnected from group %s", userID, groupCode)
+			close(done)
 			delete(session.Clients, userID)
 			handleSendMemberUpdate(groupCode, userID, session, conn, *status, true)
 			services.LeaveGroup(userID, groupCode)
 			conn.Close()
 		}()
-
-		// Send the initial group status and members to the user
-		status := getGroupStatus(groupCode)
-		if status == nil {
-			log.Printf("Failed to get group status for group %s", groupCode)
-			return
-		}
-		handleSendMemberUpdate(groupCode, userID, session, conn, *status, false)
 
 		// Handle incoming messages from the WebSocket connection
 		for {
@@ -177,24 +244,10 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 
 				// Handle group session end messages
 				case types.GroupSessionEndMessage:
-					err := services.EndGroupSession(groupCode, userID)
-					if err != nil {
-						conn.WriteJSON(map[string]string{"error": err.Error()})
-						break
+					if success := endGroupSession(groupCode, userID, conn, session, status); !success {
+						conn.WriteJSON(map[string]string{"error": "Failed to end group session"})
 					}
-
-					*status = types.GroupStatusClosed
-
-					// Broadcast the group session end message to all clients
-					services.GroupBroadcast(*session, map[string]interface{}{
-						"message":     "Group session ended",
-						"type":        "group_session_ended",
-						"group_status": *status,
-						"group_code": groupCode,
-						// Add Matched Restaurant here as well as statistics
-						// match: Restaurant,
-						// statistics: map[string]interface{}{"votes": 10, "comments": 5},
-					})
+					return
 			}
 		}
 	}

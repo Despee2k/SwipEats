@@ -9,9 +9,7 @@ type Match struct {
 
 	CreatedAt 		time.Time      `json:"created_at" gorm:"autoCreateTime;not null"`
 
-	GroupID   		uint           `json:"group_id" gorm:"not null"`
-	RestaurantID 	uint           `json:"restaurant_id" gorm:"not null"`
+	GroupRestaurantID uint `json:"group_restaurant_id" gorm:"not null"`
 
-	Group	   		Group          `json:"-" gorm:"foreignKey:GroupID;not null"`
-	Restaurant  	Restaurant     `json:"-" gorm:"foreignKey:RestaurantID;not null"`
+	GroupRestaurant GroupRestaurant `json:"-" gorm:"foreignKey:GroupRestaurantID;references:ID"`
 }
