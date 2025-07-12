@@ -41,6 +41,23 @@ func GetGroupMembershipByUserIDAndGroupID(userID uint, groupID uint) (*models.Gr
 	return &membership, nil
 }
 
+func GetGroupMembershipByUserIDAndGroupIDWithDeleted(userID uint, groupID uint) (*models.GroupMembership, error) {
+	if db.Conn == nil {
+		return nil, gorm.ErrInvalidDB // Database connection is not established
+	}
+
+	var membership models.GroupMembership
+	result := db.Conn.Unscoped().Where("user_id = ? AND group_id = ?", userID, groupID).First(&membership)
+
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil // Membership not found
+		}
+		return nil, result.Error // Other error
+	}
+	return &membership, nil
+}
+
 func GetGroupMembershipsByGroupID(groupID uint) ([]models.GroupMembership, error) {
 	if db.Conn == nil {
 		return nil, gorm.ErrInvalidDB // Database connection is not established
@@ -56,6 +73,18 @@ func GetGroupMembershipsByGroupID(groupID uint) ([]models.GroupMembership, error
 		return nil, result.Error // Other error
 	}
 	return memberships, nil
+}
+
+func UpdateGroupMembership(membership *models.GroupMembership) error {
+	if db.Conn == nil {
+		return gorm.ErrInvalidDB // Database connection is not established
+	}
+
+	result := db.Conn.Save(membership)
+	if result.Error != nil {
+		return result.Error // Error updating group membership
+	}
+	return nil // Group membership updated successfully
 }
 
 func RemoveUserFromGroup(membership *models.GroupMembership) error {

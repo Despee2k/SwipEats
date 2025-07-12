@@ -11,10 +11,15 @@ func GroupRouter() http.Handler {
 	r := chi.NewRouter()
 
 	r.Get("/{group_code}/members", handlers.GetGroupMembersHandler)
+	r.Get("/{group_code}/restaurants", handlers.GroupRestaurantHandler)
 
 	r.Post("/create", handlers.CreateGroupHandler)
-	r.Post("/{group_code}/join", handlers.JoinGroupHandler)
-	r.Post("/{group_code}/leave", handlers.LeaveGroupHandler)
+	
+	// Join is now handled via WebSocket
+	// r.Post("/{group_code}/join", handlers.JoinGroupHandler)
+
+	// Leave is now handled via WebSocket
+	// r.Post("/{group_code}/leave", handlers.LeaveGroupHandler)
 
 	return r
 }

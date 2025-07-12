@@ -35,7 +35,7 @@ func GetRestaurantByID(restaurantID uint) (*models.Restaurant, error) {
 	return &restaurant, nil
 }
 
-func GetNearbyRestaurants(lat float64, long float64, radius float64) ([]models.Restaurant, error) {
+func GetNearbyRestaurants(lat float64, long float64, radius int) ([]models.Restaurant, error) {
 	if db.Conn == nil {
 		return nil, gorm.ErrInvalidDB // Database connection is not established
 	}

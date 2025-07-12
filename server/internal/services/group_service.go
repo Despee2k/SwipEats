@@ -83,11 +83,9 @@ func StartGroupSession(groupCode string, userID uint) error {
 	if err != nil {
 		return err
 	}
-
 	if member == nil {
 		return errors.ErrUserNotFound
 	}
-
 	if !member.IsOwner {
 		return errors.ErrUserNotAuthorized
 	}

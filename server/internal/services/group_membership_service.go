@@ -7,6 +7,7 @@ import (
 	"github.com/SwipEats/SwipEats/server/internal/errors"
 	"github.com/SwipEats/SwipEats/server/internal/repositories"
 	"github.com/SwipEats/SwipEats/server/internal/types"
+	"gorm.io/gorm"
 )
 
 func JoinGroup(groupCode string, userID uint) (*dtos.JoinGroupResponseDto, error) {
@@ -19,17 +20,25 @@ func JoinGroup(groupCode string, userID uint) (*dtos.JoinGroupResponseDto, error
 		return nil, errors.ErrGroupNotFound
 	}
 
-	if group.GroupStatus != types.GroupStatusWaiting {
+	if group.GroupStatus == types.GroupStatusClosed {
 		return nil, errors.ErrGroupClosed
 	}
 
-	membership, err := repositories.GetGroupMembershipByUserIDAndGroupID(userID, group.ID)
+	membership, err := repositories.GetGroupMembershipByUserIDAndGroupIDWithDeleted(userID, group.ID)
 	if err != nil {
 		return nil, err
 	}
 
+	// Reuse the membership if it exists and was previously deleted
 	if membership != nil {
-		return nil, errors.ErrUserAlreadyInGroup
+		membership.DeletedAt = gorm.DeletedAt{} // Restore the membership if it was previously deleted
+		err = repositories.UpdateGroupMembership(membership)
+		if err != nil {
+			return nil, err
+		}
+		return &dtos.JoinGroupResponseDto{
+			Message: "Successfully rejoined the group",
+		}, nil
 	}
 
 	err = repositories.AddUserToGroup(userID, group.ID, false)
@@ -52,7 +61,11 @@ func LeaveGroup(userID uint, groupCode string) error {
 		return errors.ErrGroupNotFound
 	}
 
-	membership, err := repositories.GetGroupMembershipByUserIDAndGroupID(userID, group.ID)
+	if group.GroupStatus == types.GroupStatusClosed {
+		return errors.ErrGroupClosed
+	}
+
+	membership, err := repositories.GetGroupMembershipByUserIDAndGroupIDWithDeleted(userID, group.ID)
 
 	if err != nil {
 		return err
@@ -96,8 +109,17 @@ func GetGroupMembers(groupCode string, userID uint) ([]dtos.UserMembershipRespon
 
 	var memberDtos []dtos.UserMembershipResponseDto
 	for _, membership := range memberships {
+		user, err := repositories.GetUserByID(membership.UserID)
+		if err != nil {
+			return nil, err
+		}
+		if user == nil {
+			return nil, errors.ErrUserNotFound
+		}
+
 		memberDtos = append(memberDtos, dtos.UserMembershipResponseDto{
 			UserID:  membership.UserID,
+			Name: user.Name,
 			IsOwner: membership.IsOwner,
 		})
 	}
