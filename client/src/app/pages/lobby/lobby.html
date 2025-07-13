@@ -1,1 +1,75 @@
-<p class="text-white">lobby works!</p>
+<app-navigation-bar></app-navigation-bar>
+<div class="p-4 space-y-6 mt-20 overflow-hidden">
+  <!-- Group Actions -->
+  <div class="flex gap-4">
+    <div class="flex-1 bg-[#FF4D30] text-white p-4 rounded-xl shadow-md text-center">
+      <p class="text-lg font-semibold">Create Group</p>
+      <p class="text-sm mt-1 text-gray-100">Start a new session</p>
+    </div>
+    <div class="flex-1 bg-[#1e1e1e] text-white p-4 rounded-xl shadow-md text-center">
+      <p class="text-lg font-semibold">Join Group</p>
+      <p class="text-sm mt-1 text-gray-400">Enter group code</p>
+    </div>
+  </div>
+
+  <!-- Groups -->
+  <div>
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="text-lg font-bold">Your Groups</h2>
+      <span class="text-sm text-orange-400">3 active</span>
+    </div>
+    <div class="space-y-3">
+      <!-- Group Cards -->
+      <div class="bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center">
+        <div>
+          <p class="font-semibold">Weekend Foodies</p>
+          <div class="text-sm text-gray-400 mt-1 flex items-center gap-2">
+            <span>4 members</span>
+            <span>•</span>
+            <span>2 min ago</span>
+          </div>
+        </div>
+        <span class="bg-green-700 text-xs px-2 py-1 rounded-full">Active</span>
+      </div>
+
+      <div class="bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center">
+        <div>
+          <p class="font-semibold">Office Lunch Crew</p>
+          <div class="text-sm text-gray-400 mt-1 flex items-center gap-2">
+            <span>6 members</span>
+            <span>•</span>
+            <span>1 hour ago</span>
+          </div>
+        </div>
+        <span class="bg-yellow-600 text-xs px-2 py-1 rounded-full">Waiting</span>
+      </div>
+
+      <div class="bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center">
+        <div>
+          <p class="font-semibold">Date Night</p>
+          <div class="text-sm text-gray-400 mt-1 flex items-center gap-2">
+            <span>2 members</span>
+            <span>•</span>
+            <span>Yesterday</span>
+          </div>
+        </div>
+        <span class="bg-blue-700 text-xs px-2 py-1 rounded-full">Matched</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Matches -->
+  <div>
+    <h2 class="text-lg font-bold mb-2">Recent Matches</h2>
+    <div class="bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center">
+      <div>
+        <p class="font-semibold">Bella Italia</p>
+        <p class="text-sm text-gray-400">Matched with "Date Night" group</p>
+        <p class="text-xs text-gray-500 mt-1">1 km away</p>
+      </div>
+      <button class="bg-green-700 text-white px-4 py-1 rounded-full text-sm font-medium">
+        View
+      </button>
+    </div>
+  </div>
+</div>
