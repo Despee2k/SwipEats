@@ -5,10 +5,11 @@ import { AuthService } from '../../services/auth/auth';
 import { GetGroupResponse } from '../../types/group';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-lobby',
-  imports: [NavigationBar, CommonModule],
+  imports: [NavigationBar, CommonModule, RouterLink],
   templateUrl: './lobby.html',
   styleUrl: './lobby.css'
 })

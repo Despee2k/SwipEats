@@ -14,3 +14,7 @@ export type GetGroupResponse = {
     member_count: number;
     created_at: string;
 }
+
+export interface CreateGroupResponse {
+  group_code: string;
+}
