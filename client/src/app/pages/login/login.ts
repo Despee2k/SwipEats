@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { AuthService } from '../../services/auth';
+import { AuthService } from '../../services/auth/auth';
 import { Router, RouterLink } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
@@ -57,8 +57,13 @@ export class Login {
 
     this.auth.login({ email: this.email, password: this.password }).subscribe({
       next: (res) => {
+        if (!res || !res.data || !res.data.token) {
+          this.toastr.error('Login failed. Invalid response from server.', 'Error');
+          this.enableButton(); // Re-enable button on error
+          return;
+        }
         this.toastr.success('Login successful! Redirecting...', 'Success');
-        this.auth.storeToken(res.token);
+        this.auth.storeToken(res.data.token);
         setTimeout(() => this.router.navigate(['/lobby']), 1500);
       },
       error: (err) => {

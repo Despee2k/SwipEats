@@ -75,6 +75,20 @@ func GetGroupMembershipsByGroupID(groupID uint) ([]models.GroupMembership, error
 	return memberships, nil
 }
 
+func GetMemberCountByGroupID(groupID uint) (int64, error) {
+	if db.Conn == nil {
+		return 0, gorm.ErrInvalidDB // Database connection is not established
+	}
+
+	var count int64
+	result := db.Conn.Model(&models.GroupMembership{}).Where("group_id = ? AND deleted_at IS NULL", groupID).Count(&count)
+
+	if result.Error != nil {
+		return 0, result.Error // Error counting memberships
+	}
+	return count, nil // Return the count of members
+}
+
 func UpdateGroupMembership(membership *models.GroupMembership) error {
 	if db.Conn == nil {
 		return gorm.ErrInvalidDB // Database connection is not established

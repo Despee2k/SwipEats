@@ -103,6 +103,30 @@ func JoinGroupHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func GetUserGroupsHandler(w http.ResponseWriter, r *http.Request) {
+	var errorResponse dtos.APIErrorResponse
+	var successResponse dtos.APISuccessResponse[[]dtos.GetGroupResponseDto]
+
+	userID := r.Context().Value(middlewares.UserIDKey).(uint)
+
+	w.Header().Set("Content-Type", "application/json")
+
+	groups, err := services.GetUserGroups(userID)
+	if err != nil {
+		errorResponse.Message = "Failed to retrieve user groups"
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errorResponse)
+		return
+	}
+
+	successResponse.Message = "User groups retrieved successfully"
+	successResponse.Data = groups
+
+	json.NewEncoder(w).Encode(successResponse)
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func LeaveGroupHandler(w http.ResponseWriter, r *http.Request) {
 	var errorResponse dtos.APIErrorResponse
 	var successResponse dtos.APISuccessResponse[any]
@@ -178,7 +202,6 @@ func GetGroupMembersHandler(w http.ResponseWriter, r *http.Request) {
 	successResponse.Message = "Group members retrieved successfully"
 	successResponse.Data = members
 
-	json.NewEncoder(w).Encode(successResponse)
-
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(successResponse)
 }

@@ -2,7 +2,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../services/auth';
+import { AuthService } from '../../services/auth/auth';
 import { ToastrService } from 'ngx-toastr';
 import { InputField } from '../../components/input-field/input-field';
 import { animate, style, transition, trigger } from '@angular/animations';

@@ -10,6 +10,7 @@ import (
 func GroupRouter() http.Handler {
 	r := chi.NewRouter()
 
+	r.Get("/", handlers.GetUserGroupsHandler)
 	r.Get("/{group_code}/members", handlers.GetGroupMembersHandler)
 	r.Get("/{group_code}/restaurants", handlers.GroupRestaurantHandler)
 

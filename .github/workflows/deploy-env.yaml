@@ -39,7 +39,7 @@ jobs:
             cd ..
 
             # Reconfigure .htaccess
-            cat <<EOF > .htaccess
+            cat <<'EOF' > .htaccess
             DirectoryIndex disabled
 
             RewriteEngine on

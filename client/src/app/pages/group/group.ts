@@ -8,5 +8,5 @@ import { NavigationBar } from '../../components/navigation-bar/navigation-bar';
   styleUrl: './group.css'
 })
 export class Group {
-
+  activeModal: 'create' | 'join' | 'success' | null = 'create';
 }

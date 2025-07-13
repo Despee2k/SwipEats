@@ -5,5 +5,5 @@ type GroupStatusEnum string
 const (
 	GroupStatusWaiting GroupStatusEnum = "waiting"
 	GroupStatusActive  GroupStatusEnum = "active"
-	GroupStatusClosed  GroupStatusEnum = "closed"
+	GroupStatusClosed  GroupStatusEnum = "matched"
 )
