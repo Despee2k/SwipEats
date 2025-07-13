@@ -22,20 +22,32 @@
     </div>
     <div class="space-y-3">
       <!-- Group Cards -->
-       <div *ngFor="let group of getGroupResponse" class="bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center">
+      <a
+        *ngFor="let group of getGroupResponse"
+        [routerLink]="['/group', group.group_code]"
+        class="block bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center hover:bg-[#2a2a2a] transition-all duration-200"
+      >
         <div>
           <p class="font-semibold">{{ group.name }}</p>
           <div class="text-sm text-gray-400 mt-1 flex items-center gap-2">
             <span>{{ group.member_count }} members</span>
             <span>•</span>
-            <span>{{ group.created_at | date:'short' }}</span>
+            <span>{{ group.created_at | date: 'short' }}</span>
           </div>
         </div>
-        <span [ngClass]="{'bg-green-700': group.group_status === 'active', 'bg-yellow-600': group.group_status === 'waiting', 'bg-blue-700': group.group_status === 'matched'}" class="text-xs px-2 py-1 rounded-full">
+        <span
+          [ngClass]="{
+            'bg-green-700': group.group_status === 'active',
+            'bg-yellow-600': group.group_status === 'waiting',
+            'bg-blue-700': group.group_status === 'matched'
+          }"
+          class="text-xs px-2 py-1 rounded-full"
+        >
           {{ group.group_status[0].toUpperCase() + group.group_status.slice(1).toLowerCase() }}
         </span>
-      </div>
-      <div *ngIf="getGroupResponse.length === 0" class="text-gray-500 text-center p-4 rounded-xl ">
+      </a>
+
+      <div *ngIf="getGroupResponse.length === 0" class="text-gray-500 text-center p-4 rounded-xl">
         <p class="text-sm">You have no active groups. Create or join a group to get started!</p>
       </div>
     </div>
