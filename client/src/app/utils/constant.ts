@@ -1,4 +1,4 @@
-export const PRODUCTION = true;
+export const PRODUCTION = false;
 
 export const BASE_URL = 'https://swipeats-api.dcism.org';
 export const BASE_URL_LOCAL = 'http://localhost:42562';

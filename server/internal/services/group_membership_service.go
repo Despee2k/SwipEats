@@ -51,6 +51,34 @@ func JoinGroup(groupCode string, userID uint) (*dtos.JoinGroupResponseDto, error
 	}, nil
 }
 
+func GetUserGroups(userID uint) ([]dtos.GetGroupResponseDto, error) {
+	groups, err := repositories.GetGroupsByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var groupDtos []dtos.GetGroupResponseDto
+	for _, group := range groups {
+		count, err := repositories.GetMemberCountByGroupID(group.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		groupDtos = append(groupDtos, dtos.GetGroupResponseDto{
+			GroupCode:   group.GroupCode,
+			Name:        group.Name,
+			LocationLat: group.LocationLat,
+			LocationLong: group.LocationLong,
+			IsOwner:    group.CreatedBy == userID,
+			GroupStatus:     group.GroupStatus,
+			MemberCount: int(count),
+			CreatedAt: group.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return groupDtos, nil
+}
+
 func LeaveGroup(userID uint, groupCode string) error {
 	group, err := repositories.GetGroupByCode(groupCode)
 	if err != nil {

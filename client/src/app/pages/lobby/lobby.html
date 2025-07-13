@@ -16,44 +16,25 @@
   <div>
     <div class="flex justify-between items-center mb-2">
       <h2 class="text-lg font-bold">Your Groups</h2>
-      <span class="text-sm text-orange-400">3 active</span>
+      <span class="text-sm text-orange-400">{{ getGroupResponse.length }} active</span>
     </div>
     <div class="space-y-3">
       <!-- Group Cards -->
-      <div class="bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center">
+       <div *ngFor="let group of getGroupResponse" class="bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center">
         <div>
-          <p class="font-semibold">Weekend Foodies</p>
+          <p class="font-semibold">{{ group.name }}</p>
           <div class="text-sm text-gray-400 mt-1 flex items-center gap-2">
-            <span>4 members</span>
+            <span>{{ group.member_count }} members</span>
             <span>•</span>
-            <span>2 min ago</span>
+            <span>{{ group.created_at | date:'short' }}</span>
           </div>
         </div>
-        <span class="bg-green-700 text-xs px-2 py-1 rounded-full">Active</span>
+        <span [ngClass]="{'bg-green-700': group.group_status === 'active', 'bg-yellow-600': group.group_status === 'waiting', 'bg-blue-700': group.group_status === 'matched'}" class="text-xs px-2 py-1 rounded-full">
+          {{ group.group_status[0].toUpperCase() + group.group_status.slice(1).toLowerCase() }}
+        </span>
       </div>
-
-      <div class="bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center">
-        <div>
-          <p class="font-semibold">Office Lunch Crew</p>
-          <div class="text-sm text-gray-400 mt-1 flex items-center gap-2">
-            <span>6 members</span>
-            <span>•</span>
-            <span>1 hour ago</span>
-          </div>
-        </div>
-        <span class="bg-yellow-600 text-xs px-2 py-1 rounded-full">Waiting</span>
-      </div>
-
-      <div class="bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center">
-        <div>
-          <p class="font-semibold">Date Night</p>
-          <div class="text-sm text-gray-400 mt-1 flex items-center gap-2">
-            <span>2 members</span>
-            <span>•</span>
-            <span>Yesterday</span>
-          </div>
-        </div>
-        <span class="bg-blue-700 text-xs px-2 py-1 rounded-full">Matched</span>
+      <div *ngIf="getGroupResponse.length === 0" class="text-gray-500 text-center p-4 rounded-xl ">
+        <p class="text-sm">You have no active groups. Create or join a group to get started!</p>
       </div>
     </div>
   </div>
