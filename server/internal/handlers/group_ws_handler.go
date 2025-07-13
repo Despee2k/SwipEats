@@ -18,7 +18,7 @@ import (
 )
 
 // Helper Function to handle sending member updates
-func handleSendMemberUpdate(groupCode string, userID uint, session *types.GroupSession, conn *websocket.Conn, groupStatus types.GroupStatusEnum, deleteMember bool) {
+func handleSendMemberUpdate(groupCode string, userID uint, session *types.GroupSession, conn *websocket.Conn, groupStatus types.GroupStatusEnum) {
 	var groupRestaurants []dtos.GroupRestaurantResponseDto = nil
 
 	// Get group members
@@ -28,15 +28,7 @@ func handleSendMemberUpdate(groupCode string, userID uint, session *types.GroupS
 		return
 	}
 
-	// If the connection is closed, we delete the member
-	if deleteMember {
-		for i, v := range members {
-			if v.UserID == userID {
-				members = append(members[:i], members[i+1:]...)
-				break
-			}
-		}
-	} else if groupStatus != types.GroupStatusWaiting { // If the group status is not waiting, we fetch the group restaurants
+	if groupStatus != types.GroupStatusWaiting { // If the group status is not waiting, we fetch the group restaurants
 		groupRestaurants, err = services.GetGroupRestaurantsByGroupCode(groupCode)
 		if err != nil {
 			conn.WriteJSON(map[string]string{"error": err.Error()})
@@ -160,13 +152,14 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 			log.Printf("Failed to get group status for group %s", groupCode)
 			return
 		}
-		handleSendMemberUpdate(groupCode, userID, session, conn, *status, false)
+		handleSendMemberUpdate(groupCode, userID, session, conn, *status)
 
 		done := make(chan struct{})
 
 		// Goroutine to check if group is done
 		go func() {
-			ticker := time.NewTicker(2 * time.Second)
+			// every 5 seconds
+			ticker := time.NewTicker(5 * time.Second)
 			defer ticker.Stop()
 
 			for {
@@ -184,6 +177,7 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 						}
 						return
 					}
+					handleSendMemberUpdate(groupCode, userID, session, conn, *status)
 				case <-done:
 					return
 				}
@@ -200,8 +194,7 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 
 			close(done)
 			delete(session.Clients, userID)
-			handleSendMemberUpdate(groupCode, userID, session, conn, *status, true)
-			services.LeaveGroup(userID, groupCode)
+			handleSendMemberUpdate(groupCode, userID, session, conn, *status)
 			conn.Close()
 		}()
 

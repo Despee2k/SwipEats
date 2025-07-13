@@ -202,7 +202,6 @@ func GetGroupMembersHandler(w http.ResponseWriter, r *http.Request) {
 	successResponse.Message = "Group members retrieved successfully"
 	successResponse.Data = members
 
-	json.NewEncoder(w).Encode(successResponse)
-
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(successResponse)
 }
