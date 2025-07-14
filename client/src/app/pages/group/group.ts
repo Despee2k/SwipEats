@@ -1,18 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NavigationBar } from '../../components/navigation-bar/navigation-bar';
 import { GroupService } from '../../services/group/group';
 import { AuthService } from '../../services/auth/auth';
 import { ToastrService } from 'ngx-toastr';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-group',
+  standalone: true,
   imports: [NavigationBar, FormsModule, RouterLink],
   templateUrl: './group.html',
   styleUrl: './group.css'
 })
-export class Group {
+export class Group implements OnInit {
   activeModal: 'create' | 'join' | 'success' = 'create';
 
   groupName: string = '';
@@ -24,8 +25,18 @@ export class Group {
     private groupService: GroupService,
     private authService: AuthService,
     private toastr: ToastrService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe((params) => {
+      const modalType = params['modal'];
+      if (modalType === 'join' || modalType === 'create') {
+        this.activeModal = modalType;
+      }
+    });
+  }
 
   onCreateGroup(): void {
     if (!this.groupName.trim()) {
