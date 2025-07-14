@@ -3,14 +3,16 @@
   <!-- Group Actions -->
   <div class="flex gap-4">
     <div class="flex-1 bg-[#FF4D30] text-white p-4 rounded-xl shadow-md text-center">
-    <a routerLink="/group">
+    <a routerLink="/group" [queryParams]="{ modal: 'create' }">
       <p class="text-lg font-semibold">Create Group</p>
       <p class="text-sm mt-1 text-gray-100">Start a new session</p>
     </a>
     </div>
     <div class="flex-1 bg-[#1e1e1e] text-white p-4 rounded-xl shadow-md text-center">
-      <p class="text-lg font-semibold">Join Group</p>
-      <p class="text-sm mt-1 text-gray-400">Enter group code</p>
+      <a routerLink="/group" [queryParams]="{ modal: 'join' }">
+        <p class="text-lg font-semibold">Join Group</p>
+        <p class="text-sm mt-1 text-gray-400">Enter group code</p>
+      </a>
     </div>
   </div>
 
@@ -25,7 +27,7 @@
       <a
         *ngFor="let group of getGroupResponse"
         [routerLink]="['/group', group.group_code]"
-        class="block bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center hover:bg-[#2a2a2a] transition-all duration-200"
+        class=" bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center hover:bg-[#2a2a2a] transition-all duration-200"
       >
         <div>
           <p class="font-semibold">{{ group.name }}</p>
