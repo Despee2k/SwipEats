@@ -26,5 +26,6 @@ export interface GroupMember {
 }
 
 export interface JoinGroupResponse {
+  group_code: string;
   message: string;
 }
