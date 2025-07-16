@@ -1,7 +1,8 @@
 package dtos
 
 type JoinGroupResponseDto struct {
-	Message string `json:"message"`
+	GroupCode string `json:"group_code"`
+	Message   string `json:"message"`
 }
 
 type UserMembershipResponseDto struct {

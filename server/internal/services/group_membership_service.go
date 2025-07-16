@@ -47,6 +47,7 @@ func JoinGroup(groupCode string, userID uint) (*dtos.JoinGroupResponseDto, error
 	}
 
 	return &dtos.JoinGroupResponseDto{
+		GroupCode: group.GroupCode,
 		Message: "Successfully joined the group",
 	}, nil
 }
