@@ -91,26 +91,28 @@ export class Group implements OnInit {
       return;
     }
 
+    this.isLoading = true;
+
     const token = this.authService.getToken();
     if (!token) {
       this.toastr.error('No authentication token found');
+      this.isLoading = false;
       return;
     }
 
-    this.groupService.joinGroup(token, this.joinCode).subscribe({
-      next: () => {
+    this.groupService.connectWebSocket(
+      token,
+      this.joinCode,
+      (data) => {
+        const groupCode = data?.group_code || this.joinCode;
         this.toastr.success('Successfully joined the group!');
-        this.router.navigate(['/group', this.joinCode]);
+        this.router.navigate(['/group', groupCode]);
+        this.isLoading = false;
       },
-      error: (err) => {
-        this.toastr.error(err?.error?.message || 'Failed to join group');
+      (err) => {
+        this.toastr.error(err?.message || 'Failed to join group');
+        this.isLoading = false;
       }
-    });
-  }
-
-  copyGroupCode(): void {
-    navigator.clipboard.writeText(this.groupCode).then(() => {
-      this.toastr.success('Group code copied!');
-    });
+    );
   }
 }

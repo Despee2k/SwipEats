@@ -1,6 +1,5 @@
 <app-navigation-bar></app-navigation-bar>
 
-<!-- Toggle Buttons -->
 <div class="mt-20 space-y-6 p-4">
   <div class="flex justify-center gap-2 bg-[#1e1e1e] rounded-xl p-1">
     <button
@@ -130,7 +129,6 @@
               class="flex justify-center items-center bg-white text-black rounded-md px-4 py-2 mt-2 text-lg font-mono gap-2"
             >
               {{ groupCode }}
-              <button (click)="copyGroupCode()">📋</button>
             </div>
           </div>
           <a routerLink="/group/{{ groupCode }}" class="btn bg-[#FF4D30] text-white px-4 py-2 rounded-md">
