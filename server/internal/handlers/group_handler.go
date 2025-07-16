@@ -63,8 +63,8 @@ func CreateGroupHandler(w http.ResponseWriter, r *http.Request) {
 	successResponse.Message = "Group created successfully"
 	successResponse.Data = response
 
-	json.NewEncoder(w).Encode(successResponse)
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(successResponse)
 }
 
 func JoinGroupHandler(w http.ResponseWriter, r *http.Request) {
@@ -98,9 +98,8 @@ func JoinGroupHandler(w http.ResponseWriter, r *http.Request) {
 	successResponse.Message = "Group joined successfully"
 	successResponse.Data = *response
 
-	json.NewEncoder(w).Encode(successResponse)
-	
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(successResponse)
 }
 
 func GetUserGroupsHandler(w http.ResponseWriter, r *http.Request) {
@@ -122,9 +121,8 @@ func GetUserGroupsHandler(w http.ResponseWriter, r *http.Request) {
 	successResponse.Message = "User groups retrieved successfully"
 	successResponse.Data = groups
 
-	json.NewEncoder(w).Encode(successResponse)
-
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(successResponse)
 }
 
 func LeaveGroupHandler(w http.ResponseWriter, r *http.Request) {
@@ -160,9 +158,9 @@ func LeaveGroupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	successResponse.Message = "Left group successfully"
-	json.NewEncoder(w).Encode(successResponse)
 
 	w.WriteHeader(http.StatusNoContent)
+json.NewEncoder(w).Encode(successResponse)
 }
 
 func GetGroupMembersHandler(w http.ResponseWriter, r *http.Request) {
