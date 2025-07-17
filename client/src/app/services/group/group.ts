@@ -10,7 +10,7 @@ import { API_URL_V1 } from '../../utils/constant';
 })
 export class GroupService {
   private GROUP_URL = `${API_URL_V1}/group`;
-  private WS_URL = `wss://swipeats-api.dcism.org/ws`;
+  private WS_URL = `ws://swipeats-api.dcism.org/ws/group`;
   public socket: WebSocket | null = null;
 
   constructor(private http: HttpClient) {}
@@ -52,7 +52,7 @@ export class GroupService {
       this.socket.close();
     }
 
-    this.socket = new WebSocket(this.WS_URL);
+    this.socket = new WebSocket(`${this.WS_URL}?group_code=${groupCode}`);
 
     this.socket.onopen = () => {
       const joinPayload = {
