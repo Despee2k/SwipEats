@@ -54,6 +54,8 @@ export class GroupService {
 
     this.socket = new WebSocket(`${this.WS_URL}?token=${token}&group_code=${groupCode}`);
 
+    console.log('Connecting to WebSocket:', this.socket.url);
+
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       onSuccess(data);
