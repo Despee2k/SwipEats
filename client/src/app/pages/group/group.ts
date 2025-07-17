@@ -40,7 +40,7 @@ export class Group implements OnInit {
 
   onCreateGroup(): void {
     if (!this.groupName.trim()) {
-      this.toastr.error('Group name is required');
+      this.toastr.error('Group name is required', 'Error');
       return;
     }
 
@@ -48,7 +48,7 @@ export class Group implements OnInit {
 
     const token = this.authService.getToken();
     if (!token) {
-      this.toastr.error('No authentication token found');
+      this.toastr.error('No authentication token found', 'Error');
       this.isLoading = false;
       return;
     }
@@ -64,7 +64,7 @@ export class Group implements OnInit {
         this.groupService.createGroup(token, payload).subscribe({
           next: (res) => {
             if (!res.data?.group_code) {
-              this.toastr.error('Group code missing in response');
+              this.toastr.error('Group code missing in response', 'Error');
               this.isLoading = false;
               return;
             }
@@ -73,13 +73,13 @@ export class Group implements OnInit {
             this.isLoading = false;
           },
           error: (err) => {
-            this.toastr.error(err?.error?.message || 'Failed to create group');
+            this.toastr.error(err?.error?.message || 'Failed to create group', 'Error');
             this.isLoading = false;
           }
         });
       },
       () => {
-        this.toastr.error('Location access denied');
+        this.toastr.error('Location access denied', 'Error');
         this.isLoading = false;
       }
     );
@@ -87,7 +87,7 @@ export class Group implements OnInit {
 
   onJoinGroup(): void {
     if (!this.joinCode.trim()) {
-      this.toastr.error('Group code is required');
+      this.toastr.error('Group code is required', 'Error');
       return;
     }
 
@@ -95,24 +95,11 @@ export class Group implements OnInit {
 
     const token = this.authService.getToken();
     if (!token) {
-      this.toastr.error('No authentication token found');
+      this.toastr.error('No authentication token found', 'Error');
       this.isLoading = false;
       return;
     }
 
-    this.groupService.connectWebSocket(
-      token,
-      this.joinCode,
-      (data) => {
-        const groupCode = data?.group_code || this.joinCode;
-        this.toastr.success('Successfully joined the group!');
-        this.router.navigate(['/group', groupCode]);
-        this.isLoading = false;
-      },
-      (err) => {
-        this.toastr.error(err?.message || 'Failed to join group');
-        this.isLoading = false;
-      }
-    );
+    this.router.navigate(['/group', this.joinCode]);
   }
 }

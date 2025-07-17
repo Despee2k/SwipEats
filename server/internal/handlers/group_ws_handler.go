@@ -9,13 +9,26 @@ import (
 	"github.com/SwipEats/SwipEats/server/internal/constants"
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
 	"github.com/SwipEats/SwipEats/server/internal/errors"
-	"github.com/SwipEats/SwipEats/server/internal/middlewares"
 	"github.com/SwipEats/SwipEats/server/internal/repositories"
 	"github.com/SwipEats/SwipEats/server/internal/services"
 	"github.com/SwipEats/SwipEats/server/internal/types"
 	"github.com/SwipEats/SwipEats/server/internal/utils"
 	"github.com/gorilla/websocket"
 )
+
+func getUserIDFromToken(token string) (uint, error) {
+	user, err := utils.ValidateJWT(token)
+	if err != nil {
+		return 0, err
+	}
+
+	existingUser, err := repositories.GetUserByEmail(user.Email)
+	if err != nil {
+		return 0, err
+	}
+
+	return existingUser.ID, nil
+}
 
 // Helper Function to handle sending member updates
 func handleSendMemberUpdate(groupCode string, userID uint, session *types.GroupSession, conn *websocket.Conn, groupStatus types.GroupStatusEnum) {
@@ -66,8 +79,10 @@ func endGroupSession(groupCode string, userID uint, conn *websocket.Conn, sessio
 		return false
 	}
 
-	// Update the group status to closed
-	*status = types.GroupStatusClosed
+	if status != nil {
+		// Update the group status to closed
+		*status = types.GroupStatusClosed
+	}
 
 	// Get the group's most liked group restaurant
 	mostLikedGroupRestaurant, err := services.GetMostLikedGroupRestaurant(groupCode)
@@ -79,7 +94,7 @@ func endGroupSession(groupCode string, userID uint, conn *websocket.Conn, sessio
 	response := map[string]interface{}{
 		"message":     "Group session ended",
 		"type":        "group_session_ended",
-		"group_status": *status,
+		"group_status": types.GroupStatusClosed,
 		"group_code": groupCode,
 	}
 	
@@ -105,9 +120,25 @@ func endGroupSession(groupCode string, userID uint, conn *websocket.Conn, sessio
 func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var errorResponse dtos.APIErrorResponse
+		var status *types.GroupStatusEnum
 		encoder := json.NewEncoder(w)
 
-		userID := r.Context().Value(middlewares.UserIDKey).(uint)
+		token := r.URL.Query().Get("token")
+		if token == "" {
+			errorResponse.Message = "Token is required"
+			w.WriteHeader(http.StatusBadRequest)
+			encoder.Encode(&errorResponse)
+			return
+		}
+
+		userID, err := getUserIDFromToken(token)
+		if err != nil {
+			errorResponse.Message = "Unauthorized: Invalid token"
+			w.WriteHeader(http.StatusUnauthorized)
+			encoder.Encode(&errorResponse)
+			return
+		}
+		
 		groupCode := r.URL.Query().Get("group_code")
 
 		if groupCode == "" {
@@ -135,6 +166,9 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 		session := services.GetOrCreateGroupSession(gss, groupCode)
 		session.Clients[userID] = client
 
+		// Check group status
+		 
+
 		// Check if the user is already in the group
 		_, err = services.JoinGroup(groupCode, userID)
 		if err != nil && err != errors.ErrUserAlreadyInGroup {
@@ -144,15 +178,17 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 			}
 			conn.Close()
 			return
-		}
+		} else {
+			status = getGroupStatus(groupCode)
+			if status == nil {
+				log.Printf("Failed to get group status for group %s", groupCode)
+				return
+			}
 
-		// Send the initial group status and members to the user
-		status := getGroupStatus(groupCode)
-		if status == nil {
-			log.Printf("Failed to get group status for group %s", groupCode)
-			return
+			if err == nil {
+				handleSendMemberUpdate(groupCode, userID, session, conn, *status)
+			}
 		}
-		handleSendMemberUpdate(groupCode, userID, session, conn, *status)
 
 		done := make(chan struct{})
 
@@ -177,7 +213,9 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 						}
 						return
 					}
-					handleSendMemberUpdate(groupCode, userID, session, conn, *status)
+					if status != nil {
+						handleSendMemberUpdate(groupCode, userID, session, conn, *status)
+					}
 				case <-done:
 					return
 				}
@@ -224,14 +262,16 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 						break
 					}
 
-					*status = types.GroupStatusActive
+					if status != nil {
+						*status = types.GroupStatusActive
+					}
 
 					// Broadcast the group session start message to all clients
 					services.GroupBroadcast(*session, map[string]interface{}{
 						"message":         "Group session started",
 						"type":            "group_session_started",
-						"group_status": *status,
-						"group_code":     groupCode,
+						"group_status": 	types.GroupStatusActive,
+						"group_code":     	groupCode,
 						"group_restaurants": groupRestaurants,
 					})
 

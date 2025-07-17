@@ -51,7 +51,7 @@ func Setup(gss *types.GroupSessionService) http.Handler {
 	})
 
 	// WebSocket route for group sessions
-	r.With(middlewares.JWTMiddleware).Get("/ws/group", handlers.MakeGroupWsHandler(gss))
+	r.Get("/ws/group", handlers.MakeGroupWsHandler(gss))
 
 	return r
 }

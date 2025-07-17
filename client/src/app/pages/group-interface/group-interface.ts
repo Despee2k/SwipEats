@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { GroupService } from '../../services/group/group';
 import { GroupMember } from '../../types/group';
 import { AuthService } from '../../services/auth/auth';
 import { NavigationBar } from '../../components/navigation-bar/navigation-bar';
 import { CommonModule } from '@angular/common';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-group-interface',
@@ -19,36 +20,44 @@ export class GroupInterface implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private groupService: GroupService,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
     this.groupCode = this.route.snapshot.paramMap.get('groupCode') ?? '';
-    this.fetchGroupMembers();
-  }
-
-  fetchGroupMembers(): void {
-    const token = this.authService.getToken();
-    if (!token) {
-      console.error('No token found. User may not be authenticated.');
+    if (!this.groupCode) {
+      this.toastr.error('Group code is required', 'Error');
       return;
     }
-
-    this.groupService.fetchGroupMembers(token, this.groupCode).subscribe({
-      next: (res) => {
-        this.members = res.data ?? [];
-      },
-      error: (err) => {
-        console.error('Failed to fetch group members:', err);
-      }
-    });
+      this.groupService.connectWebSocket(
+        this.authService.getToken() || '',
+        this.groupCode,
+        (data) => {
+          if (data.type === 'members_update') {
+            this.members = [...data.members];
+          }
+          else if (data.type === 'group_session_started') {
+            // Handle group session start, e.g., navigate to session page or show a message
+            this.toastr.success('Group session started successfully', 'Success');
+          }
+          else if (data.type === 'group_session_ended') {
+            // Handle group session end, e.g., navigate back or show a message
+            this.toastr.info('Group session ended', 'Info');
+          }
+        },
+        (err) => {
+          console.error('WebSocket error:', err);
+          this.toastr.error('Failed to connect to group session', 'Error');
+        }
+      );
   }
 
   copyGroupCode(): void {
     navigator.clipboard.writeText(this.groupCode).then(() => {
-      console.log('Group code copied!');
+      this.toastr.success('Group code copied!', 'Success');
     }).catch(err => {
-      console.error('Clipboard error:', err);
+      this.toastr.error('Failed to copy group code', 'Error');
     });
   }
 
@@ -58,7 +67,7 @@ export class GroupInterface implements OnInit {
         title: 'Join my SwipEats group',
         text: `Use this code to join: ${this.groupCode}`,
         url: window.location.href
-      }).catch((err) => console.error('Share failed:', err));
+      }).catch((err) => this.toastr.error('Share failed', 'Error'));
     } else {
       this.copyGroupCode();
     }
