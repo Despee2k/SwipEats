@@ -5,6 +5,7 @@ import { Signup } from './pages/signup/signup'
 import { Lobby } from './pages/lobby/lobby';
 import { Group } from './pages/group/group';
 import { GroupInterface } from './pages/group-interface/group-interface';
+import { Profile } from './pages/profile/profile';
 
 export const routes: Routes = [
     {
@@ -30,5 +31,9 @@ export const routes: Routes = [
     {
         path: 'group/:groupCode',
         component: GroupInterface
+    },
+    {
+        path: 'profile',
+        component: Profile
     }
 ];
