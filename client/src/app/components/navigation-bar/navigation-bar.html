@@ -1,4 +1,23 @@
-<div class="flex p-3 bg-[#242424] fixed top-0 left-0 w-full z-50">
-    <img src="/swipeats-logo-white.png" width="40" height="40">
-    <p class="ml-2 mt-2 font-semibold text-white">swipeats</p>
+<div class="flex items-center justify-between p-3 bg-[#242424] fixed top-0 left-0 w-full z-50">
+  @if (isLobbyPage) {
+    <div class="flex items-center">
+      <img src="/swipeats-logo-white.png" width="40" height="40" />
+      <p class="ml-2 font-semibold text-white">swipeats</p>
+    </div>
+    <a routerLink="/profile">        
+        <img
+            alt="Profile"
+            width="30"
+            height="30"
+            class="rounded-full"
+        />
+    </a>
+  } @else {
+    <button (click)="goBack()" class="text-white flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      Back
+    </button>
+  }
 </div>
