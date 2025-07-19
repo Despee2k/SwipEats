@@ -3,78 +3,77 @@
 <div class="min-h-screen bg-[#121212] flex items-center justify-center p-4 text-white">
   <div class="bg-[#1A1A1A] w-full max-w-sm rounded-xl shadow-md p-6 space-y-6">
 
-    <!-- Profile Picture -->
     <div class="flex flex-col items-center">
-      <img
-        alt="Profile"
-        src="https://via.placeholder.com/100"
-        class="w-24 h-24 rounded-full object-cover border-4 border-gray-600"
-      />
+      <img [src]="profilePictureUrl || 'https://via.placeholder.com/100'"
+           alt="Profile"
+           class="w-24 h-24 rounded-full object-cover border-4 border-gray-600" />
     </div>
 
-    <!-- Edit Profile Button -->
     <div class="flex justify-end">
-      <button
-        class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded"
-        (click)="isEditable = !isEditable"
-      >
+      <button class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded"
+              (click)="toggleEdit()">
         {{ isEditable ? 'Cancel' : 'Edit Profile' }}
       </button>
     </div>
 
-    <!-- Personal Info -->
     <div>
       <h2 class="text-md font-semibold mb-2">Personal Information</h2>
       <div class="space-y-4 bg-[#1f1f1f] p-4 rounded-lg">
 
-        <!-- Username -->
         <div>
           <label class="block text-sm text-gray-400">Username</label>
-          <input
-            type="text"
-            [readonly]="!isEditable"
-            [class.pointer-events-none]="!isEditable"
-            [class.cursor-default]="!isEditable"
-            [class.focus:outline-none]="!isEditable"
-            [class.focus:ring]="isEditable"
-            class="w-full mt-1 p-2 rounded bg-[#2a2a2a] border border-gray-600 text-white"
-            value="john_doe"
-          />
+          <input type="text"
+                 [(ngModel)]="name"
+                 [readonly]="!isEditable"
+                 [class.pointer-events-none]="!isEditable"
+                 [class.cursor-default]="!isEditable"
+                 [class.focus:outline-none]="!isEditable"
+                 [class.focus:ring]="isEditable"
+                 class="w-full mt-1 p-2 rounded bg-[#2a2a2a] border border-gray-600 text-white" />
         </div>
 
-        <!-- Email (Always Readonly) -->
         <div>
           <label class="block text-sm text-gray-400">Email</label>
-          <input
-            type="email"
-            readonly
-            class="w-full mt-1 p-2 rounded bg-[#2a2a2a] border border-gray-600 text-gray-400 cursor-not-allowed"
-            value="john.doe@example.com"
-          />
+          <input type="email"
+                 [value]="email"
+                 readonly
+                 class="w-full mt-1 p-2 rounded bg-[#2a2a2a] border border-gray-600 text-gray-400 cursor-not-allowed" />
         </div>
 
-        <!-- Password -->
         <div>
           <label class="block text-sm text-gray-400">Password</label>
-          <input
-            type="password"
-            placeholder="Password"
-            [readonly]="!isEditable"
-            [class.pointer-events-none]="!isEditable"
-            [class.cursor-default]="!isEditable"
-            [class.focus:outline-none]="!isEditable"
-            [class.focus:ring]="isEditable"
-            class="w-full mt-1 p-2 rounded bg-[#2a2a2a] border border-gray-600 text-white"
-          />
+          <input type="password"
+                 [(ngModel)]="password"
+                 placeholder="Password"
+                 [readonly]="!isEditable"
+                 [class.pointer-events-none]="!isEditable"
+                 [class.cursor-default]="!isEditable"
+                 [class.focus:outline-none]="!isEditable"
+                 [class.focus:ring]="isEditable"
+                 class="w-full mt-1 p-2 rounded bg-[#2a2a2a] border border-gray-600 text-white" />
         </div>
+
+        @if (isEditable) {
+          <div class="flex justify-center">
+            <label class="cursor-pointer bg-gray-700 hover:bg-gray-600 px-3 py-1 text-sm rounded">
+              Change Picture
+              <input type="file" (change)="onFileSelected($event)" class="hidden" />
+            </label>
+          </div>
+        }
 
       </div>
     </div>
 
-    <!-- Logout Button -->
-    <button
-      class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded font-medium"
-    >
+    @if (isEditable) {
+      <button (click)="saveProfile()"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded font-medium">
+        Save Changes
+      </button>
+    }
+
+    <button (click)="logout()"
+            class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded font-medium">
       Logout
     </button>
   </div>
