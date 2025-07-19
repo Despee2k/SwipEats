@@ -8,5 +8,5 @@ import { NavigationBar } from '../../components/navigation-bar/navigation-bar';
   styleUrl: './profile.css'
 })
 export class Profile {
-
+  isEditable = false;
 }
