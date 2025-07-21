@@ -104,4 +104,8 @@ export class GroupInterface implements OnInit {
     this.toastr.success('You have left the group', 'Success');
     this.groupService.leaveGroup();
   }
+
+  getEncodedImageUrl(email: string): string {
+    return this.baseImageUrl + encodeURIComponent(email);
+  }
 }

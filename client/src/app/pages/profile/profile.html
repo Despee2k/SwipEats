@@ -4,9 +4,18 @@
   <div class="bg-[#1A1A1A] w-full max-w-sm rounded-xl shadow-md p-6 space-y-6">
 
     <div class="flex flex-col items-center">
-      <img [src]="profilePictureUrl || 'https://via.placeholder.com/100'"
-           alt="Profile"
-           class="w-24 h-24 rounded-full object-cover border-4 border-gray-600" />
+      <img
+        *ngIf="!imageLoadFailed"
+        [src]="profilePictureUrl"
+        (error)="imageLoadFailed = true"
+        alt="Profile"
+        class="w-24 h-24 rounded-full object-cover border-4 border-gray-600" 
+      />
+      <div
+        *ngIf="imageLoadFailed"
+        class="w-24 h-24 bg-gray-600 rounded-full flex items-center justify-center">
+      </div>
+
     </div>
 
     <div class="flex justify-end">

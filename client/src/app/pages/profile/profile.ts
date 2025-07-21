@@ -4,10 +4,11 @@ import { UserService } from '../../services/user/user';
 import { API_URL_V1 } from '../../utils/constant';
 import { NavigationBar } from '../../components/navigation-bar/navigation-bar';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-profile',
-  imports: [NavigationBar, FormsModule],
+  imports: [NavigationBar, FormsModule, CommonModule],
   templateUrl: './profile.html',
   styleUrl: './profile.css'
 })
@@ -20,6 +21,7 @@ export class Profile implements OnInit {
   profilePictureUrl: string = '';
   newProfilePicture: File | null = null;
   originalProfilePictureUrl: string = '';
+  imageLoadFailed: boolean = false;
 
   constructor(
     private authService: AuthService,
@@ -34,6 +36,7 @@ export class Profile implements OnInit {
       next: (res) => {
         if (!res.data) return;
 
+        this.imageLoadFailed = false;
         this.name = res.data.name;
         this.email = res.data.email;
         this.profilePictureUrl = `${API_URL_V1}/uploads/${encodeURIComponent(res.data.email)}`;
@@ -57,6 +60,7 @@ export class Profile implements OnInit {
   onFileSelected(event: Event): void {
     const file = (event.target as HTMLInputElement)?.files?.[0];
     if (file) {
+      this.imageLoadFailed = false;
       this.newProfilePicture = file;
       this.profilePictureUrl = URL.createObjectURL(file);
     }
