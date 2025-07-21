@@ -19,6 +19,6 @@ export class NavigationBar implements OnInit {
   }
 
   goBack(): void {
-    this.location.back();
+    this.router.navigate(['lobby']);
   }
 }

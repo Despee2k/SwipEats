@@ -3,7 +3,7 @@
 <div class="mt-20 space-y-6 p-4">
   <div class="flex justify-center gap-2 bg-[#1e1e1e] rounded-xl p-1">
     <button
-      class="flex-1 py-2 font-semibold rounded-xl"
+      class="flex-1 py-2 font-semibold rounded-xl cursor-pointer"
       [class.bg-[#FF4D30]]="activeModal === 'create'"
       [class.text-white]="activeModal === 'create'"
       [class.text-gray-400]="activeModal !== 'create'"
@@ -12,7 +12,7 @@
       Create Group
     </button>
     <button
-      class="flex-1 py-2 font-semibold rounded-xl"
+      class="flex-1 py-2 font-semibold rounded-xl cursor-pointer"
       [class.bg-[#FF4D30]]="activeModal === 'join'"
       [class.text-white]="activeModal === 'join'"
       [class.text-gray-400]="activeModal !== 'join'"
@@ -62,7 +62,7 @@
           </div>
           <div>
             <button
-              class="w-full bg-gradient-to-r from-orange-600 to-red-500 py-2 rounded-md font-semibold text-white"
+              class="cursor-pointer w-full bg-gradient-to-r from-orange-600 to-red-500 py-2 rounded-md font-semibold text-white"
               (click)="onCreateGroup()"
             >
               Create Group
@@ -106,7 +106,7 @@
           </div>
           <div>
             <button
-              class="w-full bg-gradient-to-r from-purple-600 to-indigo-500 py-2 rounded-md font-semibold text-white"
+              class="cursor-pointer w-full bg-gradient-to-r from-purple-600 to-indigo-500 py-2 rounded-md font-semibold text-white"
               (click)="onJoinGroup()"
             >
               Join Group

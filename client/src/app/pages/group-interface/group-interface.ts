@@ -8,14 +8,18 @@ import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
 import { API_URL_V1 } from '../../utils/constant';
 import { getRoundedDownHour } from '../../utils/general';
+import { GroupLanding } from '../../components/group-landing/group-landing';
+import { GroupStarted } from '../../components/group-started/group-started';
 
 @Component({
   selector: 'app-group-interface',
-  imports: [CommonModule, RouterLink, NavigationBar],
+  imports: [CommonModule, NavigationBar, GroupLanding, GroupStarted],
   templateUrl: './group-interface.html',
   styleUrl: './group-interface.css'
 })
 export class GroupInterface implements OnInit {
+  groupLanding: string = 'loading'; // Default to landing view
+
   groupCode: string = '';
   members: GroupMember[] = [];
   userId: number | null = null;
@@ -42,6 +46,17 @@ export class GroupInterface implements OnInit {
         this.authService.getToken() || '',
         this.groupCode,
         (data) => {
+          if (data.group_status && data.group_status === 'active') {
+            this.groupLanding = 'started';
+          }
+          else if (data.group_status && data.group_status === 'waiting') {
+            this.groupLanding = 'landing';
+          }
+          else {
+            this.toastr.error('Invalid group status', 'Error');
+            return;
+          }
+
           if (data.type === 'members_update') {
             this.members = [...data.members.map((member: GroupMember) => {
               if (member.user_id === this.userId) {
@@ -57,6 +72,7 @@ export class GroupInterface implements OnInit {
           else if (data.type === 'group_session_started') {
             // Handle group session start, e.g., navigate to session page or show a message
             this.toastr.success('Group session started successfully', 'Success');
+            this.groupLanding = 'started';
           }
           else if (data.type === 'group_session_ended') {
             // Handle group session end, e.g., navigate back or show a message
@@ -71,42 +87,14 @@ export class GroupInterface implements OnInit {
       );
   }
 
-  handleImageError(email: string): void {
-    this.imageLoadFailed[email] = true;
-  }
-
-  copyGroupCode(): void {
-    navigator.clipboard.writeText(this.groupCode).then(() => {
-      this.toastr.success('Group code copied!', 'Success');
-    }).catch(err => {
-      this.toastr.error('Failed to copy group code', 'Error');
-    });
-  }
-
-  shareGroupCode(): void {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Join my SwipEats group',
-        text: `Use this code to join: ${this.groupCode}`,
-        url: window.location.href
-      }).catch((err) => console.error('Share failed'));
-    } else {
-      this.copyGroupCode();
-    }
-  }
-
-  endGroup(): void {
+  endGroup = (): void => {
     this.router.navigate(['/lobby']);
     this.groupService.endGroup();
   }
 
-  leaveGroup(): void {
+  leaveGroup = (): void => {
     this.router.navigate(['/lobby']);
     this.toastr.success('You have left the group', 'Success');
     this.groupService.leaveGroup();
-  }
-
-  getEncodedImageUrl(email: string): string {
-    return this.baseImageUrl + encodeURIComponent(email) + '?t=' + getRoundedDownHour(); // Prevent caching
   }
 }
