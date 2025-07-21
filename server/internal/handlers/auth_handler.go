@@ -122,6 +122,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	successResponse.Message = "Login successful"
 	successResponse.Data = response
 
-	json.NewEncoder(w).Encode(successResponse)
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(successResponse)
 }

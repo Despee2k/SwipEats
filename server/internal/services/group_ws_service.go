@@ -2,6 +2,7 @@ package services
 
 import (
 	"log"
+	"strings"
 
 	"github.com/SwipEats/SwipEats/server/internal/types"
 )
@@ -17,6 +18,7 @@ func GroupBroadcast(gs types.GroupSession, msg any) {
 }
 
 func GetOrCreateGroupSession(gss *types.GroupSessionService, groupCode string) *types.GroupSession {
+	groupCode = strings.ToUpper(groupCode)
 	session, exists := gss.Sessions[groupCode]
 	if !exists {
 		session = &types.GroupSession{

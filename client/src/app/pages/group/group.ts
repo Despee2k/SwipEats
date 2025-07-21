@@ -38,6 +38,11 @@ export class Group implements OnInit {
     });
   }
 
+  onInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.joinCode = input.value.toUpperCase();
+  }
+
   onCreateGroup(): void {
     if (!this.groupName.trim()) {
       this.toastr.error('Group name is required', 'Error');
@@ -68,7 +73,7 @@ export class Group implements OnInit {
               this.isLoading = false;
               return;
             }
-            this.groupCode = res.data.group_code;
+            this.groupCode = res.data.group_code.toUpperCase();
             this.activeModal = 'success';
             this.isLoading = false;
           },
@@ -86,7 +91,7 @@ export class Group implements OnInit {
   }
 
   onJoinGroup(): void {
-    if (!this.joinCode.trim()) {
+    if (!this.joinCode.trim().toUpperCase()) {
       this.toastr.error('Group code is required', 'Error');
       return;
     }
@@ -100,6 +105,6 @@ export class Group implements OnInit {
       return;
     }
 
-    this.router.navigate(['/group', this.joinCode]);
+    this.router.navigate(['/group', this.joinCode.toUpperCase()]);
   }
 }

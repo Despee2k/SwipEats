@@ -90,7 +90,9 @@
             <input
               type="text"
               [(ngModel)]="joinCode"
+              (input)="onInput($event)"
               placeholder="Enter 6-digit code"
+              maxlength="6"
               class="w-full bg-[#2a2a2a] text-white px-4 py-2 rounded-md border border-gray-600 placeholder-gray-500"
             />
           </div>
