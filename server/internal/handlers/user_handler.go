@@ -122,13 +122,12 @@ func GetProfilePictureHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	imgPath := filepath.Clean(user.ProfilePicture)
-	file, err := os.Open(imgPath)
-	if err != nil {
-		log.Printf("Error opening image file: %v", err)
+	
+	if _, err := os.Stat(imgPath); os.IsNotExist(err) {
+		log.Printf("Image file not found: %s", imgPath)
 		http.Error(w, "Image not found", http.StatusNotFound)
 		return
 	}
-	defer file.Close()
 
 	w.Header().Set("Content-Type", "image/jpeg") // or detect dynamically
 	http.ServeFile(w, r, imgPath)
