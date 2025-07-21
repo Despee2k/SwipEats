@@ -7,6 +7,7 @@ import { NavigationBar } from '../../components/navigation-bar/navigation-bar';
 import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
 import { API_URL_V1 } from '../../utils/constant';
+import { getRoundedDownHour } from '../../utils/general';
 
 @Component({
   selector: 'app-group-interface',
@@ -106,6 +107,6 @@ export class GroupInterface implements OnInit {
   }
 
   getEncodedImageUrl(email: string): string {
-    return this.baseImageUrl + encodeURIComponent(email) + '?t=' + new Date().getTime(); // Prevent caching
+    return this.baseImageUrl + encodeURIComponent(email) + '?t=' + getRoundedDownHour(); // Prevent caching
   }
 }
