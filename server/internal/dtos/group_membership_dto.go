@@ -7,6 +7,6 @@ type JoinGroupResponseDto struct {
 
 type UserMembershipResponseDto struct {
 	UserID   uint   `json:"user_id"`
-	Name string `json:"username"`
+	Name     string `json:"name"`
 	IsOwner  bool   `json:"is_owner"`
 }
