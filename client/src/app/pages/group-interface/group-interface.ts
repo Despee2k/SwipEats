@@ -106,6 +106,6 @@ export class GroupInterface implements OnInit {
   }
 
   getEncodedImageUrl(email: string): string {
-    return this.baseImageUrl + encodeURIComponent(email);
+    return this.baseImageUrl + encodeURIComponent(email) + '?t=' + new Date().getTime(); // Prevent caching
   }
 }

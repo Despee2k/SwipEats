@@ -41,8 +41,8 @@ export class Profile implements OnInit {
         this.imageLoadFailed = false;
         this.name = res.data.name;
         this.email = res.data.email;
-        this.profilePictureUrl = `${API_URL_V1}/uploads/${encodeURIComponent(res.data.email)}`;
-        this.originalProfilePictureUrl = this.profilePictureUrl;
+        this.originalProfilePictureUrl = `${API_URL_V1}/uploads/${encodeURIComponent(res.data.email)}`;
+        this.profilePictureUrl = this.originalProfilePictureUrl + '?t=' + new Date().getTime(); // Prevent caching
       },
       error: (err) => {
         console.error('Failed to fetch user details', err);
@@ -73,7 +73,7 @@ export class Profile implements OnInit {
     if (!this.isEditable) {
       this.password = '';
       this.newProfilePicture = null;
-      this.profilePictureUrl = this.originalProfilePictureUrl;
+      this.profilePictureUrl = this.originalProfilePictureUrl + '?t=' + new Date().getTime(); // Reset to original picture
     }
   }
 
