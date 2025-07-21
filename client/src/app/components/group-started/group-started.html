@@ -1,1 +1,95 @@
-<p class="my-20">swiping logic here</p>
+<div class="mt-20 flex flex-col items-center justify-start relative overflow-hidden bg-[#121212]">
+  <div class="w-full h-1 bg-gray-700">
+    <div class="h-full bg-[#f97316] w-1/5 transition-all duration-300 ease-in-out"></div>
+  </div>
+
+  <!-- Swipe Cards -->
+  <div *ngIf="!isFinished; else noRestaurants" class="relative w-full flex items-center justify-center h-[520px] px-4">
+    <div
+    *ngFor="let card of restaurantCards; let i = index"
+    [ngClass]="{
+        'z-20': i === currentIndex,
+        'z-10': i === currentIndex + 1,
+        'z-0': i > currentIndex + 1
+    }"
+    class="absolute transition-transform duration-300 ease-in-out cursor-pointer"
+    [style.transform]="
+        i === currentIndex
+        ? transforms[i]
+        : i === currentIndex + 1
+            ? 'scale(0.95) translateY(20px)'
+            : 'scale(0.9) translateY(40px)'
+    "
+    [style.opacity]="i < currentIndex ? 0 : 1"
+    [style.pointerEvents]="i === currentIndex ? 'auto' : 'none'"
+    >
+      <div class="p-5 rounded-2xl bg-[#1e1e1e] w-full max-w-md shadow-xl border border-[#2a2a2a] transition-shadow hover:shadow-2xl">
+        <div class="absolute top-3 right-3 bg-gray-800 text-xs text-gray-200 px-3 py-1 rounded-full shadow-sm">
+          {{ card.distance }}
+        </div>
+
+        <!-- IMAGE HERE BAI -->
+        <div class="h-48 bg-[#2c2c2c] rounded-xl flex items-center justify-center mb-4">
+          <span class="text-gray-500 text-4xl">📷</span>
+        </div>
+
+        <!-- Cusion optional -->
+        <div class="flex items-center justify-between mb-1">
+          <h2 class="text-xl font-bold text-white">{{ card.name }}</h2>
+          <span class="text-xs bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full uppercase tracking-wide">
+            {{ card.cuisine }}
+          </span>
+        </div>
+
+        <!-- Rating and Price -->
+        <div class="flex items-center mt-1 space-x-2 text-sm text-gray-300">
+          <span class="text-yellow-400">★★★★☆</span>
+          <span class="text-gray-300">{{ card.rating }}</span>
+          <span class="text-green-400">{{ card.price }}</span>
+        </div>
+
+        <!-- Description -->
+        <p class="mt-2 text-gray-400 text-sm leading-snug">
+          {{ card.description }}
+        </p>
+
+        <!-- Wait time (IDK IF IMPORTANT) -->
+        <div class="flex items-center text-sm text-gray-400 mt-3">
+          Wait: 15–20 min
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Restaurants Left Message -->
+  <ng-template #noRestaurants>
+    <div class="flex flex-col items-center justify-center h-[400px] text-center">
+      <h2 class="text-gray-400 text-lg font-semibold">No Restaurants Left</h2>
+      <p class="text-gray-500 text-sm mt-2">You've swiped through all available options.</p>
+    </div>
+  </ng-template>
+
+  <!-- Swipe Buttons -->
+  <div class="flex justify-center space-x-12" *ngIf="!isFinished">
+    <!-- Dislike -->
+    <button
+      class="w-16 h-16 rounded-full flex items-center justify-center bg-red-500 hover:bg-red-600 shadow-lg transition-all duration-200"
+      (click)="swipeLeft()"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Like -->
+    <button
+      class="w-16 h-16 rounded-full flex items-center justify-center bg-green-500 hover:bg-green-600 shadow-lg transition-all duration-200"
+      (click)="swipeRight()"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 015.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
+      </svg>
+    </button>
+  </div>
+  <p class="mt-4 text-gray-500 text-sm" *ngIf="!isFinished">Swipe right to like, left to pass</p>
+</div>
