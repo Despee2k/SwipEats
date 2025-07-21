@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -115,6 +116,7 @@ func GetProfilePictureHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := services.GetUserByEmail(email)
 	if err != nil {
+		log.Printf("Error retrieving user by email: %v", err)
 		http.Error(w, "User not found", http.StatusNotFound)
 		return
 	}
@@ -122,6 +124,7 @@ func GetProfilePictureHandler(w http.ResponseWriter, r *http.Request) {
 	imgPath := filepath.Clean(user.ProfilePicture)
 	file, err := os.Open(imgPath)
 	if err != nil {
+		log.Printf("Error opening image file: %v", err)
 		http.Error(w, "Image not found", http.StatusNotFound)
 		return
 	}
