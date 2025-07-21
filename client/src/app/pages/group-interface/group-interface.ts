@@ -53,7 +53,6 @@ export class GroupInterface implements OnInit {
             this.groupLanding = 'landing';
           }
           else {
-            this.toastr.error('Invalid group status', 'Error');
             return;
           }
 
