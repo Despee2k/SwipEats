@@ -105,6 +105,22 @@ export class Group implements OnInit {
       return;
     }
 
-    this.router.navigate(['/group', this.joinCode.toUpperCase()]);
+    this.groupService.checkIfGroupExists(token, this.joinCode.toUpperCase()).subscribe({
+      next: (res) => {
+        if (!res.data?.exists) {
+          this.toastr.error('Group code is invalid', 'Error');
+          this.isLoading = false;
+          return;
+        }
+
+        this.router.navigate(['/group', this.joinCode.toUpperCase()]);
+      },
+      error: (err) => {
+        this.toastr.error(err?.error?.message || 'Failed to check group existence', 'Error');
+        this.isLoading = false;
+      }
+    });
+
+    
   }
 }

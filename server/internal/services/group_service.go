@@ -165,3 +165,11 @@ func CheckIfGroupIsDone(groupCode string) (bool, error) {
 
 	return true, nil
 }
+
+func CheckIfGroupExists(groupCode string) (bool, error) {
+	group, err := repositories.GetGroupByCode(groupCode)
+	if err != nil {
+		return false, err
+	}
+	return group != nil, nil
+}

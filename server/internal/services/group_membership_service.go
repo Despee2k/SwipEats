@@ -153,6 +153,7 @@ func GetGroupMembers(groupCode string, userID uint) ([]dtos.UserMembershipRespon
 		memberDtos = append(memberDtos, dtos.UserMembershipResponseDto{
 			UserID:  membership.UserID,
 			Name: user.Name,
+			Email: user.Email,
 			IsOwner: membership.IsOwner,
 		})
 	}

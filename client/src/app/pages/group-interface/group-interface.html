@@ -38,7 +38,13 @@
       *ngFor="let member of members"
       class="flex justify-between items-center bg-[#2a2a2a] p-3 rounded-lg hover:bg-[#3a3a3a] transition-all duration-200">
       <div class="flex items-center gap-2">
-        <div class="w-6 h-6 bg-gray-600 rounded-full"></div>
+        <img 
+          *ngIf="!imageLoadFailed[member.email]"
+          [src]="`${baseImageUrl + member.email}` || ''" 
+          (error)="handleImageError(member.email)"
+          class="w-6 h-6 bg-gray-600 rounded-full" 
+        />
+        <div *ngIf="imageLoadFailed[member.email]" class="w-6 h-6 bg-gray-600 rounded-full" ></div>
         <span *ngIf="member.name !== 'You'" class="font-medium">{{ member.name }}</span>
         <span *ngIf="member.name === 'You'" class="font-medium">You <span class="text-yellow-400">👑</span></span>
       </div>
@@ -56,6 +62,8 @@
 
   <div class="space-y-2">
     <button
+      *ngIf="isOwner"
+      [ngClass]="{'opacity-50 cursor-not-allowed': members.length < 2}"
       class="w-full bg-[#FF4D30] text-white py-2 rounded-lg font-semibold hover:brightness-110 cursor-pointer transition-all duration-200">
       Start Swiping!
     </button>

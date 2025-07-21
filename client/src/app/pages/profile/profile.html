@@ -40,20 +40,21 @@
                  class="w-full mt-1 p-2 rounded bg-[#2a2a2a] border border-gray-600 text-gray-400 cursor-not-allowed" />
         </div>
 
-        <div>
-          <label class="block text-sm text-gray-400">Password</label>
-          <input type="password"
-                 [(ngModel)]="password"
-                 placeholder="Password"
-                 [readonly]="!isEditable"
-                 [class.pointer-events-none]="!isEditable"
-                 [class.cursor-default]="!isEditable"
-                 [class.focus:outline-none]="!isEditable"
-                 [class.focus:ring]="isEditable"
-                 class="w-full mt-1 p-2 rounded bg-[#2a2a2a] border border-gray-600 text-white" />
-        </div>
-
         @if (isEditable) {
+          <div>
+            <label class="block text-sm text-gray-400">Password</label>
+            <input type="password"
+                  [(ngModel)]="password"
+                  placeholder="Password"
+                  [readonly]="!isEditable"
+                  [class.pointer-events-none]="!isEditable"
+                  [class.cursor-default]="!isEditable"
+                  [class.focus:outline-none]="!isEditable"
+                  [class.focus:ring]="isEditable"
+                  class="w-full mt-1 p-2 rounded bg-[#2a2a2a] border border-gray-600 text-white" />
+          </div>
+
+        
           <div class="flex justify-center">
             <label class="cursor-pointer bg-gray-700 hover:bg-gray-600 px-3 py-1 text-sm rounded">
               Change Picture

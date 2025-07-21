@@ -19,6 +19,7 @@ export class Profile implements OnInit {
   email: string = '';
   profilePictureUrl: string = '';
   newProfilePicture: File | null = null;
+  originalProfilePictureUrl: string = '';
 
   constructor(
     private authService: AuthService,
@@ -29,9 +30,19 @@ export class Profile implements OnInit {
     const token = this.authService.getToken();
     if (!token) return;
 
-    const email = this.decodeEmailFromToken(token);
-    this.email = email;
-    this.profilePictureUrl = `${API_URL_V1}/user/profile-picture/${email}`;
+    this.userService.getUserDetails(token).subscribe({
+      next: (res) => {
+        if (!res.data) return;
+
+        this.name = res.data.name;
+        this.email = res.data.email;
+        this.profilePictureUrl = `${API_URL_V1}/uploads/${res.data.email}`;
+        this.originalProfilePictureUrl = this.profilePictureUrl;
+      },
+      error: (err) => {
+        console.error('Failed to fetch user details', err);
+      }
+    });
   }
 
   decodeEmailFromToken(token: string): string {
@@ -47,6 +58,7 @@ export class Profile implements OnInit {
     const file = (event.target as HTMLInputElement)?.files?.[0];
     if (file) {
       this.newProfilePicture = file;
+      this.profilePictureUrl = URL.createObjectURL(file);
     }
   }
 
@@ -55,6 +67,7 @@ export class Profile implements OnInit {
     if (!this.isEditable) {
       this.password = '';
       this.newProfilePicture = null;
+      this.profilePictureUrl = this.originalProfilePictureUrl;
     }
   }
 
@@ -70,7 +83,6 @@ export class Profile implements OnInit {
     }).subscribe((res) => {
       if (!res.data) return;
       
-      this.profilePictureUrl = res.data.profile_picture;
       this.password = '';
       this.newProfilePicture = null;
       this.isEditable = false;

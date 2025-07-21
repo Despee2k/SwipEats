@@ -22,6 +22,7 @@ export interface CreateGroupResponse {
 export interface GroupMember {
   user_id: number;
   name: string;
+  email: string;
   is_owner: boolean;
 }
 

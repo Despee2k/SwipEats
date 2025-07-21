@@ -13,6 +13,34 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+func GetUserHandler(w http.ResponseWriter, r *http.Request) {
+	var errorResponse dtos.APIErrorResponse
+	var successResponse dtos.APISuccessResponse[dtos.UserResponseDto]
+	
+	userID := r.Context().Value(middlewares.UserIDKey).(uint)
+
+	user, err := services.GetUserByID(userID)
+	if err != nil {
+		errorResponse.Message = "User not found"
+		errorResponse.Details = map[string]string{"id": "User does not exist"}
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(errorResponse)
+		return
+	}
+
+	response := dtos.UserResponseDto{
+		ID:             user.ID,
+		Name:           user.Name,
+		Email:          user.Email,
+	}
+
+	successResponse.Message = "User retrieved successfully"
+	successResponse.Data = response
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(successResponse)
+}
+
 func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	var errorResponse dtos.APIErrorResponse
 	var successResponse dtos.APISuccessResponse[dtos.UserUpdateResponseDto]

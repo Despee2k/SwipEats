@@ -160,7 +160,7 @@ func LeaveGroupHandler(w http.ResponseWriter, r *http.Request) {
 	successResponse.Message = "Left group successfully"
 
 	w.WriteHeader(http.StatusNoContent)
-json.NewEncoder(w).Encode(successResponse)
+	json.NewEncoder(w).Encode(successResponse)
 }
 
 func GetGroupMembersHandler(w http.ResponseWriter, r *http.Request) {
@@ -199,6 +199,31 @@ func GetGroupMembersHandler(w http.ResponseWriter, r *http.Request) {
 
 	successResponse.Message = "Group members retrieved successfully"
 	successResponse.Data = members
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(successResponse)
+}
+
+func CheckIfGroupExistsHandler(w http.ResponseWriter, r *http.Request) {
+	var errorResponse dtos.APIErrorResponse
+	var successResponse dtos.APISuccessResponse[dtos.CheckIfGroupExistsDto]
+
+	groupCode := chi.URLParam(r, "group_code")
+
+	w.Header().Set("Content-Type", "application/json")
+
+	exists, err := services.CheckIfGroupExists(groupCode)
+	if err != nil {
+		errorResponse.Message = "Failed to check if group exists"
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(errorResponse)
+		return
+	}
+
+	successResponse.Message = "Group existence check successful"
+	successResponse.Data = dtos.CheckIfGroupExistsDto{
+		Exists: exists,
+	}
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(successResponse)

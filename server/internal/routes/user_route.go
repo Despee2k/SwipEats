@@ -10,6 +10,7 @@ import (
 func UserRouter() http.Handler {
 	r := chi.NewRouter()
 
+	r.Get("/", handlers.GetUserHandler)
 	r.Patch("/update", handlers.UpdateUserHandler)
 
 	return r;

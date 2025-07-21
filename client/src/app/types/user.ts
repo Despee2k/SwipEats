@@ -1,3 +1,10 @@
+export interface UserDetails {
+  id: number;
+  name: string;
+  email: string;
+  profile_picture: string;
+}
+
 export interface UpdateUserPayload {
   name?: string;
   password?: string;

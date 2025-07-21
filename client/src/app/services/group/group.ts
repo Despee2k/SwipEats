@@ -27,6 +27,12 @@ export class GroupService {
     });
   }
 
+  checkIfGroupExists(token: string, groupCode: string): Observable<APIResponse<{ exists: boolean }>> {
+    return this.http.get<APIResponse<{ exists: boolean }>>(`${this.GROUP_URL}/${groupCode}/exists`, {
+      headers: this.authHeader(token)
+    });
+  }
+
   createGroup(
     token: string,
     payload: { name: string; location_lat: number; location_long: number }

@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth/auth';
 import { NavigationBar } from '../../components/navigation-bar/navigation-bar';
 import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
+import { API_URL_V1 } from '../../utils/constant';
 
 @Component({
   selector: 'app-group-interface',
@@ -18,6 +19,8 @@ export class GroupInterface implements OnInit {
   members: GroupMember[] = [];
   userId: number | null = null;
   isOwner: boolean = false;
+  baseImageUrl: string = `${API_URL_V1}/uploads/`;
+  imageLoadFailed: { [email: string]: boolean } = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -61,9 +64,14 @@ export class GroupInterface implements OnInit {
           }
         },
         (err) => {
+          this.router.navigate(['/lobby']);
           console.error('WebSocket error:', err);
         }
       );
+  }
+
+  handleImageError(email: string): void {
+    this.imageLoadFailed[email] = true;
   }
 
   copyGroupCode(): void {
@@ -80,7 +88,7 @@ export class GroupInterface implements OnInit {
         title: 'Join my SwipEats group',
         text: `Use this code to join: ${this.groupCode}`,
         url: window.location.href
-      }).catch((err) => this.toastr.error('Share failed', 'Error'));
+      }).catch((err) => console.error('Share failed'));
     } else {
       this.copyGroupCode();
     }

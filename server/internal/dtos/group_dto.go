@@ -22,3 +22,7 @@ type GetGroupResponseDto struct {
 	MemberCount		int     `json:"member_count"`
 	CreatedAt		string  `json:"created_at"`
 }
+
+type CheckIfGroupExistsDto struct {
+	Exists bool `json:"exists"`
+}
