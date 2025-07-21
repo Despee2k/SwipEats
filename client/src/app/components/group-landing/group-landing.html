@@ -62,7 +62,10 @@
     <button
       *ngIf="isOwner"
       [ngClass]="{'opacity-50 cursor-not-allowed': members.length < 2}"
-      class="w-full bg-[#FF4D30] text-white py-2 rounded-lg font-semibold hover:brightness-110 cursor-pointer transition-all duration-200">
+      class="w-full bg-[#FF4D30] text-white py-2 rounded-lg font-semibold hover:brightness-110 cursor-pointer transition-all duration-200"
+      (click)="startGroup()"
+      [disabled]="members.length < 2"
+    >
       Start Swiping!
     </button>
     <a

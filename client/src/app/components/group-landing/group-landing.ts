@@ -20,6 +20,7 @@ export class GroupLanding {
   @Input() isOwner!: boolean;
   @Input() endGroup!: () => void;
   @Input() leaveGroup!: () => void;
+  @Input() startGroup!: () => void;
   baseImageUrl: string = `${API_URL_V1}/uploads/`;
   imageLoadFailed: { [email: string]: boolean } = {};
 

@@ -54,6 +54,12 @@ export class GroupService {
     });
   }
 
+  startGroupSession() {
+    this.sendMessage({
+      type: 'start',
+    });
+  }
+
   fetchGroupMembers(token: string, groupCode: string): Observable<APIResponse<GroupMember[]>> {
     return this.http.get<APIResponse<GroupMember[]>>(`${this.GROUP_URL}/${groupCode}/members`, {
       headers: this.authHeader(token)

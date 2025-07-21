@@ -97,4 +97,8 @@ export class GroupInterface implements OnInit {
     this.toastr.success('You have left the group', 'Success');
     this.groupService.leaveGroup();
   }
+
+  startGroup = (): void => {
+    this.groupService.startGroupSession();
+  }
 }
