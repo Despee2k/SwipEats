@@ -1,4 +1,4 @@
-export const PRODUCTION = false;
+export const PRODUCTION = true;
 
 export const PROD_URL = 'swipeats-api.dcism.org';
 export const LOCAL_URL = 'localhost:42562';
