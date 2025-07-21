@@ -36,6 +36,12 @@ export class GroupService {
     });
   }
 
+  leaveGroup(token: string, groupCode: string): Observable<APIResponse<void>> {
+    return this.http.post<APIResponse<void>>(`${this.GROUP_URL}/${groupCode}/leave`, {}, {
+      headers: this.authHeader(token)
+    });
+  }
+
   fetchGroupMembers(token: string, groupCode: string): Observable<APIResponse<GroupMember[]>> {
     return this.http.get<APIResponse<GroupMember[]>>(`${this.GROUP_URL}/${groupCode}/members`, {
       headers: this.authHeader(token)

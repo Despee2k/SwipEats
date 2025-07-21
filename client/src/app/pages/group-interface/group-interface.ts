@@ -1,5 +1,5 @@
 import { Component, OnInit, PLATFORM_ID } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { GroupService } from '../../services/group/group';
 import { GroupMember } from '../../types/group';
 import { AuthService } from '../../services/auth/auth';
@@ -19,6 +19,7 @@ export class GroupInterface implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private groupService: GroupService,
     private authService: AuthService,
     private toastr: ToastrService
@@ -35,7 +36,12 @@ export class GroupInterface implements OnInit {
         this.groupCode,
         (data) => {
           if (data.type === 'members_update') {
-            this.members = [...data.members];
+            this.members = [...data.members.map((member: GroupMember) => {
+              return {
+                ...member,
+                name: member.name || 'User',
+              }
+            })];
           }
           else if (data.type === 'group_session_started') {
             // Handle group session start, e.g., navigate to session page or show a message
@@ -71,5 +77,17 @@ export class GroupInterface implements OnInit {
     } else {
       this.copyGroupCode();
     }
+  }
+
+  leaveGroup(): void {
+    this.groupService.leaveGroup(this.authService.getToken() || '', this.groupCode).subscribe({
+      next: () => {
+        this.toastr.success('You have left the group', 'Success');
+        this.router.navigate(['/lobby']);
+      },
+      error: (err) => {
+        this.toastr.error(err?.error?.message || 'Failed to leave group', 'Error');
+      }
+    });
   }
 }
