@@ -42,7 +42,7 @@
           *ngIf="!imageLoadFailed[member.email]"
           [src]="getEncodedImageUrl(member.email)" 
           (error)="handleImageError(member.email)"
-          class="w-6 h-6 bg-gray-600 rounded-full" 
+          class="w-6 h-6 bg-gray-600 rounded-full object-cover" 
         />
         <div *ngIf="imageLoadFailed[member.email]" class="w-6 h-6 bg-gray-600 rounded-full" ></div>
         <span *ngIf="member.name !== 'You'" class="font-medium">{{ member.name }}</span>
