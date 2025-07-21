@@ -5,6 +5,7 @@ import { API_URL_V1 } from '../../utils/constant';
 import { NavigationBar } from '../../components/navigation-bar/navigation-bar';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-profile',
@@ -25,7 +26,8 @@ export class Profile implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private userService: UserService
+    private userService: UserService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -84,12 +86,19 @@ export class Profile implements OnInit {
       password: this.password,
       profile_picture: this.newProfilePicture,
       clear_image: false
-    }).subscribe((res) => {
-      if (!res.data) return;
-      
-      this.password = '';
-      this.newProfilePicture = null;
-      this.isEditable = false;
+    }).subscribe({
+      next: (res) => {
+        if (!res.data) return;
+
+        this.password = '';
+        this.newProfilePicture = null;
+        this.isEditable = false;
+        this.toastr.success('Profile updated successfully', 'Success');
+      },
+      error: (err) => {
+        this.toastr.error('Failed to update profile', 'Error');
+        console.error('Error updating profile', err);
+      }
     });
   }
 
