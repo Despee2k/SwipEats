@@ -1,11 +1,14 @@
 package services
 
 import (
+	"log"
+
 	"github.com/SwipEats/SwipEats/server/internal/types"
 )
 
 func GroupBroadcast(gs types.GroupSession, msg any) {
 	for id, client := range gs.Clients {
+		log.Printf("[Broadcast] Sending to user %d", id)
 		if err := client.Conn.WriteJSON(msg); err != nil {
 			client.Conn.Close()
 			delete(gs.Clients, id)
