@@ -36,9 +36,15 @@ export class GroupService {
     });
   }
 
-  leaveGroup(token: string, groupCode: string): Observable<APIResponse<void>> {
-    return this.http.post<APIResponse<void>>(`${this.GROUP_URL}/${groupCode}/leave`, {}, {
-      headers: this.authHeader(token)
+  leaveGroup() {
+    this.sendMessage({
+      type: 'leave',
+    });
+  }
+
+  endGroup() {
+    this.sendMessage({
+      type: 'end',
     });
   }
 

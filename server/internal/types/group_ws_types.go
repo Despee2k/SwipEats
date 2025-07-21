@@ -23,4 +23,5 @@ type GroupSessionMessage string
 var (
 	GroupSessionStartMessage GroupSessionMessage = "start"
 	GroupSessionEndMessage   GroupSessionMessage = "end"
+	GroupSessionLeaveMessage  GroupSessionMessage = "leave"
 )

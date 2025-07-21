@@ -65,9 +65,9 @@
       Back to Home
     </a>
     <button
-      (click)="leaveGroup()"
+      (click)="isOwner ? endGroup() : leaveGroup()"
       class="w-full bg-[#b92d17] text-white py-2 rounded-lg font-semibold hover:brightness-110 cursor-pointer transition-all duration-200">
-      Leave Group
+      {{ isOwner ? 'End Group' : 'Leave Group' }}
     </button>
   </div>
 </div>

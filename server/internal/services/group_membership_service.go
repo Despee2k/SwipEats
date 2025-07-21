@@ -65,6 +65,10 @@ func GetUserGroups(userID uint) ([]dtos.GetGroupResponseDto, error) {
 			return nil, err
 		}
 
+		if group.GroupStatus == types.GroupStatusClosed {
+			continue // Skip closed groups
+		}
+		
 		groupDtos = append(groupDtos, dtos.GetGroupResponseDto{
 			GroupCode:   group.GroupCode,
 			Name:        group.Name,
@@ -112,38 +116,44 @@ func LeaveGroup(userID uint, groupCode string) error {
 	return nil
 }
 
-func GetGroupMembers(groupCode string, userID uint) ([]dtos.UserMembershipResponseDto, error) {
+func GetGroupMembers(groupCode string, userID uint) ([]dtos.UserMembershipResponseDto, bool, error) {
+	var isOwner bool = false
+
 	group, err := repositories.GetGroupByCode(groupCode)
 	if err != nil {
-		return nil, err
+		return nil, isOwner, err
 	}
 
 	if group == nil {
-		return nil, errors.ErrGroupNotFound
+		return nil, isOwner, errors.ErrGroupNotFound
 	}
 
 	confirmMembership, err := repositories.GetGroupMembershipByUserIDAndGroupID(userID, group.ID)
 	if err != nil {
-		return nil, err
+		return nil, isOwner, err
 	}
 
 	if confirmMembership == nil {
-		return nil, errors.ErrUserNotInGroup
+		return nil, isOwner, errors.ErrUserNotInGroup
+	}
+
+	if confirmMembership.IsOwner {
+		isOwner = true
 	}
 
 	memberships, err := repositories.GetGroupMembershipsByGroupID(group.ID)
 	if err != nil {
-		return nil, err
+		return nil, isOwner, err
 	}
 
 	var memberDtos []dtos.UserMembershipResponseDto
 	for _, membership := range memberships {
 		user, err := repositories.GetUserByID(membership.UserID)
 		if err != nil {
-			return nil, err
+			return nil, isOwner, err
 		}
 		if user == nil {
-			return nil, errors.ErrUserNotFound
+			return nil, isOwner, errors.ErrUserNotFound
 		}
 
 		memberDtos = append(memberDtos, dtos.UserMembershipResponseDto{
@@ -153,5 +163,5 @@ func GetGroupMembers(groupCode string, userID uint) ([]dtos.UserMembershipRespon
 		})
 	}
 
-	return memberDtos, nil
+	return memberDtos, isOwner, nil
 }

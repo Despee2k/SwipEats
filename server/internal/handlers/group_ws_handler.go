@@ -31,11 +31,11 @@ func getUserIDFromToken(token string) (uint, error) {
 }
 
 // Helper Function to handle sending member updates
-func handleSendMemberUpdate(groupCode string, userID uint, session *types.GroupSession, conn *websocket.Conn, groupStatus types.GroupStatusEnum) {
+func handleSendMemberUpdate(groupCode string, userID uint, session *types.GroupSession, conn *websocket.Conn, groupStatus types.GroupStatusEnum, isLeave bool) {
 	var groupRestaurants []dtos.GroupRestaurantResponseDto = nil
 
 	// Get group members
-	members, err := services.GetGroupMembers(groupCode, userID)
+	members, isOwner, err := services.GetGroupMembers(groupCode, userID)
 	if err != nil {
 		conn.WriteJSON(map[string]string{"error": err.Error()})
 		return
@@ -49,11 +49,23 @@ func handleSendMemberUpdate(groupCode string, userID uint, session *types.GroupS
 		}
 	}
 
+	if isLeave {
+		// If the user is leaving, we need to remove them from the members list
+		for i, member := range members {
+			if member.UserID == userID {
+				members = append(members[:i], members[i+1:]...)
+				services.LeaveGroup(userID, groupCode)
+				break
+			}
+		}
+	}
+
 	response := map[string]interface{}{
 		"message":     "Group members updated",
 		"type":       "members_update",
 		"members":     members,
 		"group_status": groupStatus,
+		"is_owner":  isOwner,
 	}
 
 	if groupRestaurants != nil {
@@ -186,7 +198,7 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 			}
 
 			if err == nil {
-				handleSendMemberUpdate(groupCode, userID, session, conn, *status)
+				handleSendMemberUpdate(groupCode, userID, session, conn, *status, false)
 			}
 		}
 
@@ -214,7 +226,7 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 						return
 					}
 					if status != nil {
-						handleSendMemberUpdate(groupCode, userID, session, conn, *status)
+						handleSendMemberUpdate(groupCode, userID, session, conn, *status, false)
 					}
 				case <-done:
 					return
@@ -232,7 +244,7 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 
 			close(done)
 			delete(session.Clients, userID)
-			handleSendMemberUpdate(groupCode, userID, session, conn, *status)
+			handleSendMemberUpdate(groupCode, userID, session, conn, *status, false)
 			conn.Close()
 		}()
 
@@ -280,6 +292,11 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 					if success := endGroupSession(groupCode, userID, conn, session, status); !success {
 						conn.WriteJSON(map[string]string{"error": "Failed to end group session"})
 					}
+					return
+
+				// Handle group session leave messages
+				case types.GroupSessionLeaveMessage:
+					handleSendMemberUpdate(groupCode, userID, session, conn, *status, true)
 					return
 			}
 		}

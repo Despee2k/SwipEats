@@ -19,7 +19,7 @@ func GroupRouter() http.Handler {
 	// Join is now handled via WebSocket
 	// r.Post("/{group_code}/join", handlers.JoinGroupHandler)
 
-	r.Post("/{group_code}/leave", handlers.LeaveGroupHandler)
+	// r.Post("/{group_code}/leave", handlers.LeaveGroupHandler)
 
 	return r
 }

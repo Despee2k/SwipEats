@@ -16,6 +16,7 @@ import { ToastrService } from 'ngx-toastr';
 export class GroupInterface implements OnInit {
   groupCode: string = '';
   members: GroupMember[] = [];
+  isOwner: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -35,6 +36,8 @@ export class GroupInterface implements OnInit {
         this.authService.getToken() || '',
         this.groupCode,
         (data) => {
+          this.isOwner = data.is_owner || false;
+
           if (data.type === 'members_update') {
             this.members = [...data.members.map((member: GroupMember) => {
               return {
@@ -49,12 +52,11 @@ export class GroupInterface implements OnInit {
           }
           else if (data.type === 'group_session_ended') {
             // Handle group session end, e.g., navigate back or show a message
-            this.toastr.info('Group session ended', 'Info');
+            this.toastr.success('Group session ended', 'Success');
           }
         },
         (err) => {
           console.error('WebSocket error:', err);
-          this.toastr.error('Failed to connect to group session', 'Error');
         }
       );
   }
@@ -79,15 +81,14 @@ export class GroupInterface implements OnInit {
     }
   }
 
+  endGroup(): void {
+    this.router.navigate(['/lobby']);
+    this.groupService.endGroup();
+  }
+
   leaveGroup(): void {
-    this.groupService.leaveGroup(this.authService.getToken() || '', this.groupCode).subscribe({
-      next: () => {
-        this.toastr.success('You have left the group', 'Success');
-        this.router.navigate(['/lobby']);
-      },
-      error: (err) => {
-        this.toastr.error(err?.error?.message || 'Failed to leave group', 'Error');
-      }
-    });
+    this.router.navigate(['/lobby']);
+    this.toastr.success('You have left the group', 'Success');
+    this.groupService.leaveGroup();
   }
 }
