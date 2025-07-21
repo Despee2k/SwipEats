@@ -36,7 +36,7 @@ export class Profile implements OnInit {
 
         this.name = res.data.name;
         this.email = res.data.email;
-        this.profilePictureUrl = `${API_URL_V1}/uploads/${res.data.email}`;
+        this.profilePictureUrl = `${API_URL_V1}/uploads/${encodeURIComponent(res.data.email)}`;
         this.originalProfilePictureUrl = this.profilePictureUrl;
       },
       error: (err) => {

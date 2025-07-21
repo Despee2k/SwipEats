@@ -40,7 +40,7 @@
       <div class="flex items-center gap-2">
         <img 
           *ngIf="!imageLoadFailed[member.email]"
-          [src]="`${baseImageUrl + member.email}` || ''" 
+          [src]="`${baseImageUrl + encodeURIComponent(member.email)}` || ''" 
           (error)="handleImageError(member.email)"
           class="w-6 h-6 bg-gray-600 rounded-full" 
         />
