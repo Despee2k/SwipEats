@@ -179,7 +179,7 @@ func GetGroupMembersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	members, _, err := services.GetGroupMembers(groupCode, userID)
+	members, err := services.GetGroupMembers(groupCode, userID)
 	if err != nil {
 		switch err {
 			case errors.ErrGroupNotFound:

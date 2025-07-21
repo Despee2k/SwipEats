@@ -63,7 +63,7 @@ export class Login {
           return;
         }
         this.toastr.success('Login successful! Redirecting...', 'Success');
-        this.auth.storeToken(res.data.token);
+        this.auth.storeUserData(res.data);
         setTimeout(() => this.router.navigate(['/lobby']), 1500);
       },
       error: (err) => {

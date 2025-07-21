@@ -93,14 +93,15 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := services.LoginUser(&user)
+	token, userID, err := services.LoginUser(&user)
 	if err != nil {
 
 		switch err {
 			case errors.ErrInvalidCredentials:
 				errorResponse.Message = "Invalid login credentials"
 				errorResponse.Details = map[string]string{
-					"email": "invalid", 
+					"user_id":  "invalid",
+					"email":    "invalid",
 					"password": "invalid",
 				}
 			default:
@@ -113,8 +114,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := dtos.UserLoginResponseDto{
-		Email: user.Email,
-		Token: token,
+		UserID: userID,
+		Email:  user.Email,
+		Token:  token,
 	}
 
 	successResponse.Message = "Login successful"

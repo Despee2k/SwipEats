@@ -16,6 +16,7 @@ import { ToastrService } from 'ngx-toastr';
 export class GroupInterface implements OnInit {
   groupCode: string = '';
   members: GroupMember[] = [];
+  userId: number | null = null;
   isOwner: boolean = false;
 
   constructor(
@@ -27,6 +28,7 @@ export class GroupInterface implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.userId = this.authService.getUserId();
     this.groupCode = this.route.snapshot.paramMap.get('groupCode') ?? '';
     if (!this.groupCode) {
       this.toastr.error('Group code is required', 'Error');
@@ -36,10 +38,12 @@ export class GroupInterface implements OnInit {
         this.authService.getToken() || '',
         this.groupCode,
         (data) => {
-          this.isOwner = data.is_owner || false;
-
           if (data.type === 'members_update') {
             this.members = [...data.members.map((member: GroupMember) => {
+              if (member.user_id === this.userId) {
+                this.isOwner = member.is_owner;
+              }
+
               return {
                 ...member,
                 name: member.name || 'User',
@@ -52,6 +56,7 @@ export class GroupInterface implements OnInit {
           }
           else if (data.type === 'group_session_ended') {
             // Handle group session end, e.g., navigate back or show a message
+            this.router.navigate(['/lobby']);
             this.toastr.success('Group session ended', 'Success');
           }
         },

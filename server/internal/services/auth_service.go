@@ -38,28 +38,28 @@ func RegisterUser(user *dtos.UserRegisterRequestDto) (*models.User, error) {
 	return newUser, repositories.CreateUser(newUser)
 }
 
-func LoginUser(user *dtos.UserLoginRequestDto) (string, error) {
+func LoginUser(user *dtos.UserLoginRequestDto) (string, uint, error) {
 	existingUser, err := repositories.GetUserByEmail(user.Email)
 
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 
 	if existingUser == nil {
-		return "", errors.ErrInvalidCredentials
+		return "", 0, errors.ErrInvalidCredentials
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(user.Password))
 	if err != nil {
-		return "", errors.ErrInvalidCredentials
+		return "", 0, errors.ErrInvalidCredentials
 	}
 
 	// Generate JWT token
 	token, err := utils.GenerateJWT(existingUser)
 	
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 
-	return token, nil
+	return token, existingUser.ID, nil
 }

@@ -19,8 +19,14 @@ export class AuthService {
     return this.http.post<APIResponse<LoginResponse>>(`${this.AUTH_URL}/login`, payload);
   }
 
-  storeToken(token: string) {
-    localStorage.setItem('auth_token', token);
+  storeUserData(userData: LoginResponse) {
+    localStorage.setItem('user_id', userData.user_id.toString());
+    localStorage.setItem('auth_token', userData.token);
+  }
+
+  getUserId(): number | null {
+    const userId = localStorage.getItem('user_id');
+    return userId ? parseInt(userId, 10) : null;
   }
 
   getToken(): string | null {
@@ -29,5 +35,6 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_id');
   }
 }

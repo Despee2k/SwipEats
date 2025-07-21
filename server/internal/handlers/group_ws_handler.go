@@ -35,7 +35,7 @@ func handleSendMemberUpdate(groupCode string, userID uint, session *types.GroupS
 	var groupRestaurants []dtos.GroupRestaurantResponseDto = nil
 
 	// Get group members
-	members, isOwner, err := services.GetGroupMembers(groupCode, userID)
+	members, err := services.GetGroupMembers(groupCode, userID)
 	if err != nil {
 		conn.WriteJSON(map[string]string{"error": err.Error()})
 		return
@@ -65,7 +65,6 @@ func handleSendMemberUpdate(groupCode string, userID uint, session *types.GroupS
 		"type":       "members_update",
 		"members":     members,
 		"group_status": groupStatus,
-		"is_owner":  isOwner,
 	}
 
 	if groupRestaurants != nil {

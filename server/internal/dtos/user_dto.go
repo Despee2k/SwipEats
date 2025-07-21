@@ -12,8 +12,9 @@ type UserLoginRequestDto struct {
 }
 
 type UserLoginResponseDto struct {
-	Email string `json:"email"`
-	Token string `json:"token,omitempty"` // JWT token, optional for login responses
+	UserID  uint   `json:"user_id,omitempty"` // Optional for login, required for other operations
+	Email   string `json:"email"`
+	Token   string `json:"token,omitempty"` // JWT token, optional for login responses
 }
 
 type UserUpdateRequestDto struct {

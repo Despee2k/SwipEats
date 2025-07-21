@@ -20,9 +20,9 @@ export interface CreateGroupResponse {
 }
 
 export interface GroupMember {
-  userID: number;
+  user_id: number;
   name: string;
-  isOwner: boolean;
+  is_owner: boolean;
 }
 
 export interface JoinGroupResponse {
