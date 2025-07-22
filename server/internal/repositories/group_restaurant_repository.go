@@ -42,7 +42,7 @@ func GetGroupRestaurantsByGroupID(groupID uint) ([]models.GroupRestaurant, error
 	}
 
 	var groupRestaurants []models.GroupRestaurant
-	if err := db.Conn.Where("group_id = ? AND deleted_at IS NULL", groupID).Find(&groupRestaurants).Error; err != nil {
+	if err := db.Conn.Where("group_id = ? AND deleted_at IS NULL", groupID).Preload("Restaurant").Find(&groupRestaurants).Error; err != nil {
 		return nil, err
 	}
 

@@ -25,8 +25,24 @@ func GetRestaurantByID(restaurantID uint) (*models.Restaurant, error) {
 	}
 
 	var restaurant models.Restaurant
-	result := db.Conn.Where("id = ? AND deleted_at IS NULL", restaurantID).First(&restaurant)
+	result := db.Conn.Where("id = ?", restaurantID).First(&restaurant)
 
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil // Restaurant not found
+		}
+		return nil, result.Error // Other error
+	}
+	return &restaurant, nil
+}
+
+func GetRestaurantByName(name string) (*models.Restaurant, error) {
+	if db.Conn == nil {
+		return nil, gorm.ErrInvalidDB // Database connection is not established
+	}
+
+	var restaurant models.Restaurant
+	result := db.Conn.Where("name = ?", name).First(&restaurant)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			return nil, nil // Restaurant not found

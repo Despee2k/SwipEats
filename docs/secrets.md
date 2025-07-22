@@ -24,6 +24,7 @@ This document outlines all secrets used in the deployment workflows for the Swip
 | `SSH_USERNAME`        | SSH username for connecting to the frontend deployment server |
 | `SSH_PASSWORD`        | SSH password for frontend authentication |
 | `SSH_PORT`            | SSH port used for the frontend server connection |
-| `JWT_SECRET`          | Secret key used to sign and verify JWTs.
+| `JWT_SECRET`          | Secret key used to sign and verify JWTs. |
+| `UNSPLASHED_KEY`      | API Key for Unsplashed API |
 
 

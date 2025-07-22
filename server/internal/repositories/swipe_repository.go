@@ -122,7 +122,9 @@ func GetSwipeCountByUserAndGroup(userID uint, groupID uint) (int, error) {
 	}
 
 	var count int64
-	result := db.Conn.Model(&models.Swipe{}).Where("user_id = ? AND group_id = ? AND deleted_at IS NULL", userID, groupID).Count(&count)
+	result := db.Conn.Model(&models.Swipe{}).Joins("JOIN group_restaurants ON group_restaurants.id = swipes.group_restaurant_id").
+		Where("swipes.user_id = ? AND group_restaurants.group_id = ? AND swipes.deleted_at IS NULL", userID, groupID).
+		Count(&count)
 
 	if result.Error != nil {
 		return 0, result.Error // Error counting swipes
