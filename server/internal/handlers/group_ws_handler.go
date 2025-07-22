@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
+
 	// "time"
 
 	"github.com/SwipEats/SwipEats/server/internal/constants"
@@ -16,6 +18,213 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// MakeGroupWsHandler creates a WebSocket handler for group sessions
+func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var errorResponse dtos.APIErrorResponse
+		var status *types.GroupStatusEnum
+		encoder := json.NewEncoder(w)
+
+
+		// Get token
+		token := r.URL.Query().Get("token")
+		if token == "" {
+			errorResponse.Message = "Token is required"
+			w.WriteHeader(http.StatusBadRequest)
+			encoder.Encode(&errorResponse)
+			return
+		}
+
+		userID, err := getUserIDFromToken(token)
+		if err != nil {
+			errorResponse.Message = "Unauthorized: Invalid token"
+			w.WriteHeader(http.StatusUnauthorized)
+			encoder.Encode(&errorResponse)
+			return
+		}
+		
+		groupCode := r.URL.Query().Get("group_code")
+
+		if groupCode == "" {
+			errorResponse.Message = "Group code is required"
+			w.WriteHeader(http.StatusBadRequest)
+			encoder.Encode(&errorResponse)
+			return
+		}
+
+		// Upgrade the HTTP connection to a WebSocket connection
+		conn, err := utils.Upgrade(w, r, nil)
+		if err != nil {
+			errorResponse.Message = "Failed to upgrade connection"
+			w.WriteHeader(http.StatusInternalServerError)
+			encoder.Encode(&errorResponse)
+			return
+		}
+
+		client := &types.Client{
+			ID:   userID,
+			Conn: conn,
+			IsFinished: false, // Initially, the client has not finished their swiping session
+		}
+
+		// Get or create the group session
+		session := services.GetOrCreateGroupSession(gss, groupCode)
+		session.Clients[userID] = client
+
+		// Check if the user is already in the group
+		_, err = services.JoinGroup(groupCode, userID)
+		if err != nil && err != errors.ErrUserAlreadyInGroup {
+			errorResponse.Message = "Failed to join group: " + err.Error()
+			if err := client.Conn.WriteJSON(errorResponse); err != nil {
+				log.Printf("Failed to send error response to user %d: %v", userID, err)
+			}
+			conn.Close()
+			return
+		} else {
+			status = getGroupStatus(groupCode)
+			if status == nil {
+				log.Printf("Failed to get group status for group %s", groupCode)
+				return
+			}
+
+			if err == nil {
+				handleSendMemberUpdate(groupCode, userID, session, conn, *status, false)
+			}
+		}
+
+
+
+//
+//
+// 		MAIN LOGIC
+// 		Handle incoming messages from the WebSocket connection
+//
+//
+		for {
+			var msg map[string]interface{}
+
+			// Read the message from the WebSocket connection
+			if err := conn.ReadJSON(&msg); err != nil {
+				break
+			}
+
+			// Check message type and handle accordingly
+			switch types.GroupSessionMessage(msg["type"].(string)) {
+
+
+				// START
+				// Handle group session start messages
+				case types.GroupSessionStartMessage:
+					err := services.StartGroupSession(groupCode, userID)
+					if err != nil {
+						conn.WriteJSON(map[string]string{"error": err.Error()})
+						break
+					}
+				
+					// Generate group restaurants and send them to all clients
+					groupRestaurants, err := services.GenerateGroupRestaurants(groupCode, constants.SEARCH_RADIUS, constants.MAX_NUM_OF_RESTAURANTS)
+					if err != nil {
+						conn.WriteJSON(map[string]string{"error": err.Error()})
+						break
+					}
+
+					if status != nil {
+						*status = types.GroupStatusActive
+					}
+
+					// Broadcast the group session start message to all clients
+					services.GroupBroadcast(*session, map[string]interface{}{
+						"message":         "Group session started",
+						"type":            "group_session_started",
+						"group_status": 	types.GroupStatusActive,
+						"group_code":     	groupCode,
+						"group_restaurants": groupRestaurants,
+					})
+
+
+
+				// END
+				// Handle group session end messages
+				case types.GroupSessionEndMessage:
+					if success := endGroupSession(groupCode, userID, conn, session, status); !success {
+						conn.WriteJSON(map[string]string{"error": "Failed to end group session"})
+					}
+					return
+
+
+
+				// LEAVE
+				// Handle group session leave messages
+				case types.GroupSessionLeaveMessage:
+					handleSendMemberUpdate(groupCode, userID, session, conn, *status, true)
+					return
+
+
+
+				// SUBMIT SWIPES
+				// Handle group session submit swipes messages
+				case types.GroupSessionSubmitSwipes:
+					
+					votesRaw, ok := msg["votes"].(map[string]interface{})
+					if !ok {
+						log.Println("votes field is not a valid map[string]interface{}")
+						return
+					}
+
+					for groupRestaurantIDString, voteRaw := range votesRaw {
+						groupRestaurantID, err := strconv.ParseUint(groupRestaurantIDString, 10, 32)
+						if err != nil {
+							log.Printf("Invalid restaurant ID: %s", groupRestaurantIDString)
+							continue
+						}
+
+						// Convert vote to string, then compare
+						vote, ok := voteRaw.(bool)
+						if !ok {
+							log.Println("Vote value is not a string:", voteRaw)
+							continue
+						}
+
+						// Add Swipe for this group restaurant
+						services.AddSwipe(dtos.AddSwipeDto{
+							IsLiked:          vote,
+							GroupRestaurantID: uint(groupRestaurantID),
+						}, userID)
+					}
+
+					client.IsFinished = true // Mark the client as finished swiping
+					client.Conn.WriteJSON(map[string]interface{}{
+						"type":            "group_session_swipe_finished",
+					})
+
+					// Check if all clients have finished swiping
+					allFinished := true
+					for _, c := range session.Clients {
+						if !c.IsFinished {
+							log.Printf("Client %d has not finished swiping", c.ID)
+							allFinished = false
+							break
+						}
+					}
+
+					// If finished, end the group session
+					if allFinished {
+						endGroupSession(groupCode, userID, conn, session, status)
+					}
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+///
+/// HELPER FUNCTIONS
+///
 func getUserIDFromToken(token string) (uint, error) {
 	user, err := utils.ValidateJWT(token)
 	if err != nil {
@@ -65,6 +274,7 @@ func handleSendMemberUpdate(groupCode string, userID uint, session *types.GroupS
 		"type":       "members_update",
 		"members":     members,
 		"group_status": groupStatus,
+		"group_code":  groupCode,
 	}
 
 	if groupRestaurants != nil {
@@ -111,147 +321,34 @@ func endGroupSession(groupCode string, userID uint, conn *websocket.Conn, sessio
 	
 	if mostLikedGroupRestaurant != nil {
 		// Save as a match
-		if err = services.SaveMostLikedGroupRestaurant(mostLikedGroupRestaurant.ID); err != nil {
+		id, err := services.SaveMostLikedGroupRestaurant(mostLikedGroupRestaurant.ID)
+		if err != nil {
+			conn.WriteJSON(map[string]string{"error": err.Error()})
+			return false
+		}
+
+		match, err := repositories.GetMatchByID(id)
+		if err != nil {
 			conn.WriteJSON(map[string]string{"error": err.Error()})
 			return false
 		}
 
 		// Add the most liked group restaurant to the response
-		response["most_liked_group_restaurant"] = mostLikedGroupRestaurant
+		response["most_liked_group_restaurant"] = dtos.GroupRestaurantResponseDto{
+			ID:        match.ID,
+			GroupID:  match.GroupID,
+			Restaurant: match.Restaurant,
+			DistanceInKM: utils.DistanceInKM(
+				match.Group.LocationLat,
+				match.Group.LocationLong,
+				match.Restaurant.LocationLat,
+				match.Restaurant.LocationLong,
+			),
+		}
 	}
 
 	// Broadcast the group session end message to all clients
 	services.GroupBroadcast(*session, response)
 
 	return true
-}
-
-
-// MakeGroupWsHandler creates a WebSocket handler for group sessions
-func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var errorResponse dtos.APIErrorResponse
-		var status *types.GroupStatusEnum
-		encoder := json.NewEncoder(w)
-
-		token := r.URL.Query().Get("token")
-		if token == "" {
-			errorResponse.Message = "Token is required"
-			w.WriteHeader(http.StatusBadRequest)
-			encoder.Encode(&errorResponse)
-			return
-		}
-
-		userID, err := getUserIDFromToken(token)
-		if err != nil {
-			errorResponse.Message = "Unauthorized: Invalid token"
-			w.WriteHeader(http.StatusUnauthorized)
-			encoder.Encode(&errorResponse)
-			return
-		}
-		
-		groupCode := r.URL.Query().Get("group_code")
-
-		if groupCode == "" {
-			errorResponse.Message = "Group code is required"
-			w.WriteHeader(http.StatusBadRequest)
-			encoder.Encode(&errorResponse)
-			return
-		}
-
-		// Upgrade the HTTP connection to a WebSocket connection
-		conn, err := utils.Upgrade(w, r, nil)
-		if err != nil {
-			errorResponse.Message = "Failed to upgrade connection"
-			w.WriteHeader(http.StatusInternalServerError)
-			encoder.Encode(&errorResponse)
-			return
-		}
-
-		client := &types.Client{
-			ID:   userID,
-			Conn: conn,
-		}
-
-		// Get or create the group session
-		session := services.GetOrCreateGroupSession(gss, groupCode)
-		session.Clients[userID] = client
-
-		// Check group status
-		 
-
-		// Check if the user is already in the group
-		_, err = services.JoinGroup(groupCode, userID)
-		if err != nil && err != errors.ErrUserAlreadyInGroup {
-			errorResponse.Message = "Failed to join group: " + err.Error()
-			if err := client.Conn.WriteJSON(errorResponse); err != nil {
-				log.Printf("Failed to send error response to user %d: %v", userID, err)
-			}
-			conn.Close()
-			return
-		} else {
-			status = getGroupStatus(groupCode)
-			if status == nil {
-				log.Printf("Failed to get group status for group %s", groupCode)
-				return
-			}
-
-			if err == nil {
-				handleSendMemberUpdate(groupCode, userID, session, conn, *status, false)
-			}
-		}
-
-		// Handle incoming messages from the WebSocket connection
-		for {
-			var msg map[string]string
-
-			// Read the message from the WebSocket connection
-			if err := conn.ReadJSON(&msg); err != nil {
-				break
-			}
-
-			// Check message type and handle accordingly
-			switch types.GroupSessionMessage(msg["type"]) {
-				// Handle group session start messages
-				case types.GroupSessionStartMessage:
-					err := services.StartGroupSession(groupCode, userID)
-					if err != nil {
-						conn.WriteJSON(map[string]string{"error": err.Error()})
-						break
-					}
-				
-					// Generate group restaurants and send them to all clients
-					groupRestaurants, err := services.GenerateGroupRestaurants(groupCode, constants.SEARCH_RADIUS, constants.MAX_NUM_OF_RESTAURANTS)
-					if err != nil {
-						conn.WriteJSON(map[string]string{"error": err.Error()})
-						break
-					}
-
-					if status != nil {
-						*status = types.GroupStatusActive
-					}
-
-					// Broadcast the group session start message to all clients
-					services.GroupBroadcast(*session, map[string]interface{}{
-						"message":         "Group session started",
-						"type":            "group_session_started",
-						"group_status": 	types.GroupStatusActive,
-						"group_code":     	groupCode,
-						"group_restaurants": groupRestaurants,
-					})
-
-				// Handle group session end messages
-				case types.GroupSessionEndMessage:
-					if success := endGroupSession(groupCode, userID, conn, session, status); !success {
-						conn.WriteJSON(map[string]string{"error": "Failed to end group session"})
-					}
-					return
-
-				// Handle group session leave messages
-				case types.GroupSessionLeaveMessage:
-					handleSendMemberUpdate(groupCode, userID, session, conn, *status, true)
-					return
-			}
-		}
-	}
 }

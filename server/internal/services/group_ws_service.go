@@ -7,8 +7,10 @@ import (
 	"github.com/SwipEats/SwipEats/server/internal/types"
 )
 
-func GroupBroadcast(gs types.GroupSession, msg any) {
+func GroupBroadcast(gs types.GroupSession, msg map[string]interface{}) {
 	for id, client := range gs.Clients {
+		msg["is_finished_swiping"] = client.IsFinished
+		
 		log.Printf("[Broadcast] Sending to user %d", id)
 		if err := client.Conn.WriteJSON(msg); err != nil {
 			client.Conn.Close()

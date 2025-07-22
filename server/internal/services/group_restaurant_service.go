@@ -140,6 +140,7 @@ func GetMostLikedGroupRestaurant(groupCode string) (*dtos.GroupRestaurantRespons
 	responseDto := dtos.GroupRestaurantResponseDto{
 		ID:        groupRestaurant.ID,
 		GroupID:  	group.ID,
+		RestaurantID: groupRestaurant.RestaurantID,
 		Restaurant: groupRestaurant.Restaurant,
 		DistanceInKM: utils.DistanceInKM(
 			group.LocationLat, 

@@ -13,5 +13,12 @@
   <app-group-started
     *ngSwitchCase="'started'"
     [groupRestaurants]="groupRestaurants"
+    [handleVote]="handleVote"
+    [handleSubmit]="handleSubmitVotes"
+    [alreadyVoted]="alreadyVoted"
   ></app-group-started>
+  <app-group-match
+    *ngSwitchCase="'match'"
+    [finalRestaurant]="finalRestaurant"
+  ></app-group-match>
 </ng-container>

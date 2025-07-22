@@ -66,6 +66,13 @@ export class GroupService {
     });
   }
 
+  submit_swipes(votes: {[restaurantId: number]: boolean}) {
+    this.sendMessage({
+      type: 'submit_swipes',
+      votes: votes,
+    })
+  }
+
   connectWebSocket(
     token: string,
     groupCode: string,

@@ -117,10 +117,6 @@ func EndGroupSession(groupCode string, userID uint) error {
 		return errors.ErrUserNotFound
 	}
 
-	if !member.IsOwner {
-		return errors.ErrUserNotAuthorized
-	}
-
 	group.GroupStatus = types.GroupStatusClosed
 
 	if err := repositories.UpdateGroup(group); err != nil {

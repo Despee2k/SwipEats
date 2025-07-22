@@ -19,6 +19,23 @@ func AddGroupRestaurant(groupRestaurant *models.GroupRestaurant) error {
 	return nil // Group restaurant created successfully
 }
 
+func GetGroupRestaurantByID(groupRestaurantID uint) (*models.GroupRestaurant, error) {
+	if db.Conn == nil {
+		return nil, gorm.ErrInvalidDB // Database connection is not established
+	}
+
+	var groupRestaurant models.GroupRestaurant
+	result := db.Conn.Where("id = ? AND deleted_at IS NULL", groupRestaurantID).First(&groupRestaurant)
+
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil // Group restaurant not found
+		}
+		return nil, result.Error // Other error
+	}
+	return &groupRestaurant, nil
+}
+
 func GetGroupRestaurantByGroupAndRestaurantID(groupID uint, restaurantID uint) (*models.GroupRestaurant, error) {
 	if db.Conn == nil {
 		return nil, gorm.ErrInvalidDB // Database connection is not established
@@ -68,7 +85,7 @@ func GetMostLikedGroupRestaurant(groupID uint) (*models.GroupRestaurant, error) 
 	}
 
 	var groupRestaurant models.GroupRestaurant
-	result := db.Conn.Table("swipes").Select("group_restaurant_id, COUNT(*) as like_count").
+	result := db.Conn.Table("swipes").Select("group_restaurant_id as id, group_id, restaurant_id, COUNT(*) as like_count").
 		Where("group_restaurants.group_id = ? AND is_liked = ? AND swipes.deleted_at IS NULL", groupID, true).
 		Group("group_restaurant_id").
 		Order("like_count DESC").

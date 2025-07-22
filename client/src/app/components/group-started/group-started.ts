@@ -11,6 +11,11 @@ import { trimToFirstDelimiter } from '../../utils/general';
 })
 export class GroupStarted implements OnInit {
   @Input() groupRestaurants!: GroupRestaurant[]
+  @Input() alreadyVoted!: boolean;
+
+  @Input() handleVote!: (groupRestaurantId: number, vote: boolean) => void;
+  @Input() handleSubmit!: () => void;
+
   restaurantCards: { name: string; cuisine: string; distance: string, photo_url: string }[] = [];
 
   currentIndex = 0;
@@ -97,19 +102,26 @@ export class GroupStarted implements OnInit {
 
   swipeLeft() {
     this.transforms[this.currentIndex] = 'translateX(-120vw)';
+    this.handleVote(this.groupRestaurants[this.currentIndex].id, false);
     setTimeout(() => this.nextCard(), 300);
   }
 
   swipeRight() {
     this.transforms[this.currentIndex] = 'translateX(120vw)';
+    this.handleVote(this.groupRestaurants[this.currentIndex].id, true);
     setTimeout(() => this.nextCard(), 300);
   }
 
   nextCard() {
     this.currentIndex++;
+
+    if (this.currentIndex >= this.restaurantCards.length) {
+      this.handleSubmit();
+      return;
+    }
   }
 
   get isFinished(): boolean {
-    return this.currentIndex >= this.restaurantCards.length;
+    return this.alreadyVoted || this.currentIndex >= this.restaurantCards.length;
   }
 }
