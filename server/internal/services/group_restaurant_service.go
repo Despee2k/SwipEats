@@ -47,6 +47,8 @@ func GenerateGroupRestaurants(groupCode string, radius int, numberOfRestaurants 
 		if err != nil {
 			return nil, err // Error adding group restaurant
 		}
+
+		groupRestaurant.Restaurant = restaurant // Populate the restaurant details
 		groupRestaurants = append(groupRestaurants, *groupRestaurant)
 	}
 

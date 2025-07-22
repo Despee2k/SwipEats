@@ -128,12 +128,10 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 						break
 					}
 
-					if status != nil {
-						*status = types.GroupStatusActive
-					}
+					*status = types.GroupStatusActive
 
 					// Broadcast the group session start message to all clients
-					services.GroupBroadcast(*session, map[string]interface{}{
+					services.GroupBroadcast(*session, map[string]any{
 						"message":         "Group session started",
 						"type":            "group_session_started",
 						"group_status": 	types.GroupStatusActive,
