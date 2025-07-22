@@ -15,8 +15,8 @@ import (
 )
 
 func fetchImageUrl(cuisine string) string {
-	query := fmt.Sprintf("orientation=landscape&query=%s&client_id=%s", url.QueryEscape(cuisine), constants.UNSPLASHED_KEY)
-	urlWithQuery := "https://api.unsplash.com/photos/random?" + query;
+	query := fmt.Sprintf("orientation=landscape&query=%s%%20restaurant%%20food&client_id=%s", url.QueryEscape(cuisine), constants.UNSPLASHED_KEY)
+	urlWithQuery := "https://api.unsplash.com/photos/random?" + query
 
 	resp, err := http.Get(urlWithQuery)
 	if err != nil {
@@ -41,7 +41,7 @@ func fetchImageUrl(cuisine string) string {
 }
 
 func FetchRestaurantsNearby(lat, long float64, radius int) ([]models.Restaurant, error) {
-	query := fmt.Sprintf(`[out:json];node(around:%d,%f,%f)[amenity=restaurant][cuisine][name];out body 20;`, radius, lat, long)
+	query := fmt.Sprintf(`[out:json];node(around:%d,%f,%f)[amenity=restaurant][cuisine][name];out body 10;`, radius, lat, long)
 	urlWithQuery := "https://overpass-api.de/api/interpreter?data=" + url.QueryEscape(query)
 
 	resp, err := http.Get(urlWithQuery)
