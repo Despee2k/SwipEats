@@ -20,21 +20,32 @@ export class AuthService {
   }
 
   storeUserData(userData: LoginResponse) {
-    localStorage.setItem('user_id', userData.user_id.toString());
-    localStorage.setItem('auth_token', userData.token);
+    if (typeof window !== 'undefined' && localStorage) {
+      localStorage.setItem('user_id', userData.user_id.toString());
+      localStorage.setItem('auth_token', userData.token);
+    }
   }
 
   getUserId(): number | null {
-    const userId = localStorage.getItem('user_id');
-    return userId ? parseInt(userId, 10) : null;
-  }
+    if (typeof window !== 'undefined' && localStorage) {
+      const userId = localStorage.getItem('user_id');
+      const parsed = parseInt(userId || '', 10);
+      return isNaN(parsed) ? null : parsed;
+    }
+    return null;
+}
 
   getToken(): string | null {
-    return localStorage.getItem('auth_token');
+  if (typeof window !== 'undefined' && localStorage) {
+      return localStorage.getItem('auth_token');
+    }
+    return null;
   }
 
   logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_id');
+    if (typeof window !== 'undefined' && localStorage) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_id');
+    }
   }
 }

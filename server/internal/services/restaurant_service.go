@@ -28,7 +28,7 @@ func fetchImageUrl(cuisine string) string {
 	body, _ := io.ReadAll(resp.Body)
 	var imageResponse struct {
 		Urls struct {
-			Small string `json:"small"`
+			Raw string `json:"raw"`
 		} `json:"urls"`
 	}
 
@@ -37,7 +37,7 @@ func fetchImageUrl(cuisine string) string {
 		return ""
 	}
 
-	return imageResponse.Urls.Small
+	return imageResponse.Urls.Raw
 }
 
 func FetchRestaurantsNearby(lat, long float64, radius int) ([]models.Restaurant, error) {

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"log"
 	"math"
 )
 
@@ -14,6 +15,7 @@ func degToRad(deg float64) float64 {
 
 // Haversine distance in kilometers
 func DistanceInKM(lat1, lon1, lat2, lon2 float64) float64 {
+	log.Printf("Calculating distance between (%f, %f) and (%f, %f)", lat1, lon1, lat2, lon2)
 	dLat := degToRad(lat2 - lat1)
 	dLon := degToRad(lon2 - lon1)
 

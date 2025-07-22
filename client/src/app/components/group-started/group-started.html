@@ -30,7 +30,13 @@
 
         <!-- IMAGE HERE BAI -->
         <div class="h-48 bg-[#2c2c2c] rounded-xl flex items-center justify-center mb-4">
-          <span class="text-gray-500 text-4xl">📷</span>
+          <img
+            *ngIf="card.photo_url"
+            [src]="card.photo_url"
+            alt="{{ card.name }}"
+            class="w-full h-full object-cover rounded-xl"
+          />
+          <span *ngIf="!card.photo_url" class="text-gray-500">No Image Available</span>
         </div>
 
         <!-- Cusion optional -->
@@ -44,19 +50,19 @@
         <!-- Rating and Price -->
         <div class="flex items-center mt-1 space-x-2 text-sm text-gray-300">
           <span class="text-yellow-400">★★★★☆</span>
-          <span class="text-gray-300">{{ card.rating }}</span>
-          <span class="text-green-400">{{ card.price }}</span>
+          <!-- <span class="text-gray-300">{{ card.rating }}</span>
+          <span class="text-green-400">{{ card.price }}</span> -->
         </div>
 
         <!-- Description -->
-        <p class="mt-2 text-gray-400 text-sm leading-snug">
+        <!-- <p class="mt-2 text-gray-400 text-sm leading-snug">
           {{ card.description }}
-        </p>
+        </p> -->
 
-        <!-- Wait time (IDK IF IMPORTANT) -->
+        <!-- Wait time (IDK IF IMPORTANT)
         <div class="flex items-center text-sm text-gray-400 mt-3">
           Wait: 15–20 min
-        </div>
+        </div> -->
       </div>
     </div>
   </div>

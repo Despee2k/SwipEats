@@ -10,3 +10,7 @@ export const getRoundedDownHour = (): number => {
 
     return roundedDownHour;
 }
+
+export const trimToFirstDelimiter = (input: string): string => {
+  return input.split(/[,\s;]/)[0];
+}

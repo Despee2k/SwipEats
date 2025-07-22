@@ -10,6 +10,7 @@ import { API_URL_V1 } from '../../utils/constant';
 import { getRoundedDownHour } from '../../utils/general';
 import { GroupLanding } from '../../components/group-landing/group-landing';
 import { GroupStarted } from '../../components/group-started/group-started';
+import { GroupRestaurant } from '../../types/restaurants';
 
 @Component({
   selector: 'app-group-interface',
@@ -26,6 +27,9 @@ export class GroupInterface implements OnInit {
   isOwner: boolean = false;
   baseImageUrl: string = `${API_URL_V1}/uploads/`;
   imageLoadFailed: { [email: string]: boolean } = {};
+
+  groupRestaurants: GroupRestaurant[] = [];
+  votes: { [restaurantId: number]: number } = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -57,6 +61,7 @@ export class GroupInterface implements OnInit {
           }
 
           if (data.type === 'members_update') {
+            console.log('Members update received:', data);
             this.members = [...data.members.map((member: GroupMember) => {
               if (member.user_id === this.userId) {
                 this.isOwner = member.is_owner;
@@ -67,6 +72,15 @@ export class GroupInterface implements OnInit {
                 name: member.name || 'User',
               }
             })];
+
+            if (data.group_restaurants) {
+              this.groupRestaurants = data.group_restaurants.filter((restaurant: GroupRestaurant) => {
+                return this.votes[restaurant.id] === undefined;
+              });
+            }
+            else {
+              console.log('No restaurants found for this group');
+            }
           }
           else if (data.type === 'group_session_started') {
             // Handle group session start, e.g., navigate to session page or show a message

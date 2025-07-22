@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, Input, OnInit } from '@angular/core';
+import { GroupRestaurant } from '../../types/restaurants';
+import { trimToFirstDelimiter } from '../../utils/general';
 
 @Component({
   selector: 'app-group-started',
@@ -8,32 +10,8 @@ import { Component, HostListener, OnInit } from '@angular/core';
   styleUrl: './group-started.css'
 })
 export class GroupStarted implements OnInit {
-  restaurantCards = [
-    {
-      name: 'Bella Italia',
-      cuisine: 'Italian',
-      rating: 4.5,
-      price: '$$$',
-      distance: '0.3 kilometers',
-      description: 'Authentic Italian cuisine with fresh pasta and wood-fired pizzas',
-    },
-    {
-      name: 'Sushi Zen',
-      cuisine: 'Japanese',
-      rating: 4.7,
-      price: '$$$',
-      distance: '1.2 kilometers',
-      description: 'Fresh sushi and sashimi straight from the coast',
-    },
-    {
-      name: 'Spicy Tandoori',
-      cuisine: 'Indian',
-      rating: 4.3,
-      price: '$$',
-      distance: '0.9 kilometers',
-      description: 'Traditional Indian dishes with rich spices and aroma',
-    },
-  ];
+  @Input() groupRestaurants!: GroupRestaurant[]
+  restaurantCards: { name: string; cuisine: string; distance: string, photo_url: string }[] = [];
 
   currentIndex = 0;
   startX = 0;
@@ -42,6 +20,19 @@ export class GroupStarted implements OnInit {
   transforms: string[] = [];
 
   ngOnInit(): void {
+    this.restaurantCards = this.groupRestaurants.map(groupRestaurant => {
+      const { restaurant, distance_in_km } = groupRestaurant;
+
+      const displayed_distance = (distance_in_km < 1) ? distance_in_km.toFixed(1) + ' km' : Math.round(distance_in_km) + ' km';
+
+      return {
+        name: restaurant.name,
+        cuisine: trimToFirstDelimiter(restaurant.cuisine),
+        distance: displayed_distance,
+        photo_url: restaurant.photo_url
+      };
+    });
+
     this.transforms = this.restaurantCards.map(() => 'translateX(0px)');
   }
 

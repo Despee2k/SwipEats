@@ -6,6 +6,7 @@ import (
 	"github.com/SwipEats/SwipEats/server/internal/errors"
 	"github.com/SwipEats/SwipEats/server/internal/models"
 	"github.com/SwipEats/SwipEats/server/internal/repositories"
+	"github.com/SwipEats/SwipEats/server/internal/utils"
 )
 
 func GenerateGroupRestaurants(groupCode string, radius int, numberOfRestaurants int) ([]dtos.GroupRestaurantResponseDto, error) {
@@ -55,6 +56,12 @@ func GenerateGroupRestaurants(groupCode string, radius int, numberOfRestaurants 
 			ID:        groupRestaurant.ID,
 			GroupID:  groupRestaurant.GroupID,
 			Restaurant: groupRestaurant.Restaurant,
+			DistanceInKM: utils.DistanceInKM(
+				group.LocationLat, 
+				group.LocationLong, 
+				groupRestaurant.Restaurant.LocationLat, 
+				groupRestaurant.Restaurant.LocationLong,
+			),
 		}
 		responseDtos = append(responseDtos, responseDto)
 	}
@@ -82,6 +89,12 @@ func GetGroupRestaurantsByGroupCode(groupCode string) ([]dtos.GroupRestaurantRes
 			ID:        groupRestaurant.ID,
 			GroupID:  group.ID,
 			Restaurant: groupRestaurant.Restaurant,
+			DistanceInKM: utils.DistanceInKM(
+				group.LocationLat, 
+				group.LocationLong, 
+				groupRestaurant.Restaurant.LocationLat, 
+				groupRestaurant.Restaurant.LocationLong,
+			),
 		}
 		responseDtos = append(responseDtos, responseDto)
 	}
@@ -128,6 +141,12 @@ func GetMostLikedGroupRestaurant(groupCode string) (*dtos.GroupRestaurantRespons
 		ID:        groupRestaurant.ID,
 		GroupID:  	group.ID,
 		Restaurant: groupRestaurant.Restaurant,
+		DistanceInKM: utils.DistanceInKM(
+			group.LocationLat, 
+			group.LocationLong, 
+			groupRestaurant.Restaurant.LocationLat, 
+			groupRestaurant.Restaurant.LocationLong,
+		),
 	}
 
 	return &responseDto, nil
