@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"time"
+	// "time"
 
 	"github.com/SwipEats/SwipEats/server/internal/constants"
 	"github.com/SwipEats/SwipEats/server/internal/dtos"
@@ -200,52 +200,6 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 				handleSendMemberUpdate(groupCode, userID, session, conn, *status, false)
 			}
 		}
-
-		done := make(chan struct{})
-
-		// Goroutine to check if group is done
-		go func() {
-			// every 5 seconds
-			ticker := time.NewTicker(5 * time.Second)
-			defer ticker.Stop()
-
-			for {
-				select {
-				case <-ticker.C:
-					isDone, err := services.CheckIfGroupIsDone(groupCode)
-					if err != nil {
-						continue
-					}
-					if isDone {
-						success := endGroupSession(groupCode, userID, conn, session, status)
-						if !success {
-							log.Printf("Failed to end group session for group %s", groupCode)
-							conn.WriteJSON(map[string]string{"error": "Failed to end group session"})
-						}
-						return
-					}
-					if status != nil {
-						handleSendMemberUpdate(groupCode, userID, session, conn, *status, false)
-					}
-				case <-done:
-					return
-				}
-			}
-		}()
-
-		// Defer cleanup when the connection is closed
-		defer func() {
-			status := getGroupStatus(groupCode)
-			if status == nil {
-				log.Printf("Failed to get group status for group %s", groupCode)
-				return
-			}
-
-			close(done)
-			delete(session.Clients, userID)
-			handleSendMemberUpdate(groupCode, userID, session, conn, *status, false)
-			conn.Close()
-		}()
 
 		// Handle incoming messages from the WebSocket connection
 		for {
