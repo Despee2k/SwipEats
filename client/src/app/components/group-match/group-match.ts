@@ -1,18 +1,24 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { GroupRestaurant } from '../../types/restaurants';
 import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-group-match',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [CommonModule, RouterLink],
   templateUrl: './group-match.html',
   styleUrl: './group-match.css'
 })
-export class GroupMatch {
+export class GroupMatch implements OnInit {
   @Input() finalRestaurant!: GroupRestaurant | null;
 
+  // Only required fields based on type structure
   imageUrl: string = '';
+  distance: string = '';
+  name: string = '';
+  cuisine: string = '';
 
   constructor(private toastr: ToastrService) {}
 
@@ -22,6 +28,14 @@ export class GroupMatch {
       return;
     }
 
-    this.imageUrl = this.finalRestaurant.restaurant.photo_url || '';
+    const { restaurant, distance_in_km } = this.finalRestaurant;
+
+    this.imageUrl = restaurant.photo_url || '';
+    this.distance = distance_in_km < 1
+      ? `${distance_in_km.toFixed(1)} km`
+      : `${Math.round(distance_in_km)} km`;
+
+    this.name = restaurant.name;
+    this.cuisine = restaurant.cuisine?.split(',')[0] || '';
   }
 }
