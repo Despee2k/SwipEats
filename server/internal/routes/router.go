@@ -48,6 +48,7 @@ func Setup(gss *types.GroupSessionService) http.Handler {
 		r.Mount("/auth", AuthRouter())
 		r.With(middlewares.JWTMiddleware).Mount("/user", UserRouter())
 		r.With(middlewares.JWTMiddleware).Mount("/group", GroupRouter())
+		r.With(middlewares.JWTMiddleware).Mount("/match", MatchRouter())
 	})
 
 	// WebSocket route for group sessions

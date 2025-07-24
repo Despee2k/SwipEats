@@ -41,7 +41,7 @@ func GetMatchByGroupID(groupID uint) (*models.Match, error) {
 	}
 
 	var match models.Match
-	result := db.Conn.Where("group_id = ? AND deleted_at IS NULL", groupID).First(&match)
+	result := db.Conn.Where("group_id = ?", groupID).Preload("Group").Preload("Restaurant").First(&match)
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {

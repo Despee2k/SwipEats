@@ -31,7 +31,7 @@ func GetGroupsByUserID(userID uint) ([]models.Group, error) {
 	var groups []models.Group
 	result := db.Conn.Joins("JOIN group_memberships ON group_memberships.group_id = groups.id").
 		Where("group_memberships.user_id = ? AND group_memberships.deleted_at IS NULL AND groups.deleted_at IS NULL", userID).
-		Find(&groups)
+		Find(&groups).Order("groups.created_at DESC")
 
 	if result.Error != nil {
 		return nil, result.Error // Error fetching groups
