@@ -115,6 +115,10 @@ export class GroupInterface implements OnInit {
               this.finalRestaurant = data.most_liked_group_restaurant;
               this.groupLanding = 'match';
             }
+            else {
+              this.toastr.info('Group session ended without a match', 'Info');
+              this.router.navigate(['/lobby']);
+            }
           }
         },
         (err) => {

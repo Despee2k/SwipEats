@@ -12,9 +12,11 @@ import { trimToFirstDelimiter } from '../../utils/general';
 export class GroupStarted implements OnInit {
   @Input() groupRestaurants!: GroupRestaurant[]
   @Input() alreadyVoted!: boolean;
+  @Input() isOwner!: boolean;
 
   @Input() handleVote!: (groupRestaurantId: number, vote: boolean) => void;
   @Input() handleSubmit!: () => void;
+  @Input() endGroup!: () => void;
 
   restaurantCards: { name: string; cuisine: string; distance: string, photo_url: string }[] = [];
 

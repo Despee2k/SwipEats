@@ -72,6 +72,16 @@
     <div class="flex flex-col items-center justify-center h-[400px] text-center">
       <h2 class="text-gray-400 text-lg font-semibold">Almost there!</h2>
       <p class="text-gray-500 text-sm mt-2">Just have to wait for others to finish swiping.</p>
+
+      <ng-container *ngIf="isOwner">
+        <p class="text-gray-500 text-sm mt-2">As the group owner, you can end the session at any time.</p>
+        <button
+          class="mt-4 bg-red-500 w-full cursor-pointer text-white px-4 py-2 rounded-xl hover:bg-red-600 transition-colors"
+          (click)="endGroup()"
+        >
+          End Group
+        </button>
+      </ng-container>
     </div>
   </ng-template>
 

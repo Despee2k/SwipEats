@@ -6,6 +6,8 @@ import { GetGroupResponse } from '../../types/group';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule, isPlatformBrowser, ɵnormalizeQueryParams } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { GroupRestaurant } from '../../types/restaurants';
+import { MatchService } from '../../services/match/match';
 
 @Component({
   selector: 'app-lobby',
@@ -16,8 +18,9 @@ import { RouterLink } from '@angular/router';
 export class Lobby {
   private platformId = inject(PLATFORM_ID);
   getGroupResponse: GetGroupResponse[] = [];
+  recentMatches: GroupRestaurant[] = [];
 
-  constructor(private groupService: GroupService, private authService: AuthService, private toastr: ToastrService) {}
+  constructor(private groupService: GroupService, private matchService: MatchService, private authService: AuthService, private toastr: ToastrService) {}
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
@@ -36,6 +39,19 @@ export class Lobby {
           },
           error: (error) => {
             this.toastr.error('Error fetching user groups:', error.message);
+          }
+        });
+
+        this.matchService.fetchUserRecentMatches(token).subscribe({
+          next: (res) => {
+            if (!res || !res.data) {
+              this.toastr.error('Failed to fetch recent matches.', 'Error');
+              return;
+            }
+            this.recentMatches = res.data;
+          },
+          error: (error) => {
+            this.toastr.error('Error fetching recent matches:', error.message);
           }
         });
       } else {

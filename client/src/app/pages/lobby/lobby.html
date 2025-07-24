@@ -58,15 +58,13 @@
   <!-- Recent Matches -->
   <div>
     <h2 class="text-lg font-bold mb-2">Recent Matches</h2>
-    <div class="bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center">
-      <div>
-        <p class="font-semibold">Bella Italia</p>
-        <p class="text-sm text-gray-400">Matched with "Date Night" group</p>
-        <p class="text-xs text-gray-500 mt-1">1 km away</p>
+    <div class="flex flex-col gap-3">
+      <div *ngFor="let match of recentMatches" class="bg-[#1e1e1e] p-4 rounded-xl shadow-md flex justify-between items-center w-full">
+        <div class="w-full flex items-center justify-between gap-4">
+          <p class="font-semibold truncate">{{ match.restaurant.name }}</p>
+          <p class="text-xs text-gray-500 mt-1">{{ match.distance_in_km < 1 ? (match.distance_in_km.toFixed(1)) : (match.distance_in_km | number:'1.0-0') }}&nbsp;km<br />away</p>
+        </div>
       </div>
-      <button class="bg-green-700 text-white px-4 py-1 rounded-full text-sm font-medium">
-        View
-      </button>
     </div>
   </div>
 </div>

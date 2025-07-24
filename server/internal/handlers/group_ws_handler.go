@@ -88,6 +88,22 @@ func MakeGroupWsHandler(gss *types.GroupSessionService) http.HandlerFunc {
 			}
 
 			if err == nil {
+				// Check if user has already voted
+				group, err := repositories.GetGroupByCode(groupCode)
+				if err != nil {
+					log.Printf("Failed to get group by code %s: %v", groupCode, err)
+					return 
+				}
+				count, err := repositories.GetSwipeCountByUserAndGroup(userID, group.ID)
+				if err != nil {
+					log.Printf("Failed to get swipe count for user %d in group %d: %v", userID, group.ID, err)
+					return
+				}
+
+				if count > 0 {
+					client.IsFinished = true
+				}
+
 				handleSendMemberUpdate(groupCode, userID, session, conn, *status, false)
 			}
 		}

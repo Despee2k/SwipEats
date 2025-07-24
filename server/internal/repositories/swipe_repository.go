@@ -116,6 +116,7 @@ func GetLikeCountByGroupRestaurant(groupRestaurantID uint) (int, error) {
 	}
 	return int(count), nil // Return the count of swipes
 }
+
 func GetSwipeCountByUserAndGroup(userID uint, groupID uint) (int, error) {
 	if db.Conn == nil {
 		return 0, gorm.ErrInvalidDB // Database connection is not established
