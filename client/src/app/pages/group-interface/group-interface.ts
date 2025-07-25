@@ -133,6 +133,10 @@ export class GroupInterface implements OnInit {
     this.groupService.endGroup();
   }
 
+  endEarly = (): void => {
+    this.groupService.endGroup();
+  }
+
   leaveGroup = (): void => {
     this.router.navigate(['/lobby']);
     this.toastr.success('You have left the group', 'Success');
